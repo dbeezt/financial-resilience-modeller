@@ -1,5 +1,6 @@
 import threading, tkinter.ttk
 from functools import partial
+from itertools import count
 from .Model import Model
 from PIL import Image, ImageTk
 from time import strftime
@@ -460,10 +461,7 @@ def print_to_activity_log(activity_log, message):
     activity_log.insert(END, f"\n{message}")
 
 
-# https://stackoverflow.com/questions/43770847/play-an-animated-gif-in-python-with-tkinter
-from itertools import count
-
-
+# Source: https://stackoverflow.com/questions/43770847/play-an-animated-gif-in-python-with-tkinter
 class ImageLabel(Label):
     def load(self, image):
         if isinstance(image, str):
