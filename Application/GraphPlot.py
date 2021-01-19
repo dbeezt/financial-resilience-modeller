@@ -16,7 +16,7 @@ from bokeh.io import export_png
 from bokeh.plotting import from_networkx
 
 
-class Plotter:
+class GraphPlot:
     def __init__(self, title, graph, coords, export_path):
         self.title = title
         self.width, self.height = 800, 500
@@ -66,7 +66,7 @@ class Plotter:
             size="node_size", fill_color="node_colour", fill_alpha="financial_indicator"
         )
         graph_renderer.edge_renderer.glyph = MultiLine(
-            line_color="#CCCCCC", line_alpha=0.8, line_width=1
+            line_color="edge_colour", line_alpha=1, line_width=0.8
         )
 
         if interactive:
@@ -103,7 +103,7 @@ class Plotter:
         makedirs(dirs, exist_ok=True)
         export_png(self.plot, filename=self.export_path)
 
-    def render_and_export_plot(self):
+    def render_and_export_graph(self):
         self.plot = self.create_plot()
         self.graph.update_visual_attributes()
         graph_renderer = self.create_graph_renderer()
