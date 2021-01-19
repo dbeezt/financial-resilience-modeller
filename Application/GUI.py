@@ -1,10 +1,13 @@
+import PIL.Image, PIL.ImageTk
 import threading, tkinter.ttk
 from functools import partial
 from itertools import count
-from .Model import Model
-from PIL import Image, ImageTk
-from time import strftime
+from Application.Model import Model
+from pathlib import Path
+import glob
 from tkinter import *
+from tkinter.filedialog import askdirectory
+from time import strftime
 
 class GUI(Tk):
     def __init__(self):
@@ -20,23 +23,27 @@ class GUI(Tk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.resizable(False, False)
+        self.output_dir = 'output'
+        self.latest_datetime = self.get_current_datetime()
+        self.latest_pandemic_model_gif = ''
+        self.latest_financial_model_gif = ''
         self.output_plot_dirs = []
         self.output_stats_dirs = []
 
     def create_and_position_frames(self):
         self.prepare_input_fields()
 
-        self.graph_frame = Frame(self, width=self.width, height=500, background="green")
+        self.graph_frame = Frame(self, width=self.width, height=500, background="#F0F0F0")
         self.graph_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
         log_frame = Frame(
-            self, width=int(self.width * 0.7), height=150, background="yellow"
+            self, width=int(self.width * 0.7), height=150, background="#F0F0F0"
         )
         log_frame.grid(row=1, column=0, columnspan=1, sticky="ns")
         self.compose_log_frame(log_frame)
 
         output_commands_frame = Frame(
-            self, width=int(self.width * 0.3), height=150, background="red"
+            self, width=int(self.width * 0.3), height=150, background="#F0F0F0"
         )
         output_commands_frame.grid(
             row=1, rowspan=1, column=1, columnspan=1, sticky="ns"
@@ -44,13 +51,13 @@ class GUI(Tk):
         self.compose_output_commands_frame(output_commands_frame)
 
         input_frame = Frame(
-            self, width=int(self.width * 0.7), height=150, background="red"
+            self, width=int(self.width * 0.7), height=150, background="#F0F0F0"
         )
         input_frame.grid(row=2, column=0, columnspan=1, sticky="nsew")
         self.compose_input_frame(input_frame)
 
         model_commands_frame = Frame(
-            self, width=int(self.width * 0.3), height=150, background="purple"
+            self, width=int(self.width * 0.3), height=150, background="#F0F0F0"
         )
         model_commands_frame.grid(row=2, rowspan=1, column=1, columnspan=1, sticky="ns")
         self.compose_model_commands_frame(model_commands_frame)
@@ -81,8 +88,8 @@ class GUI(Tk):
             self.field_titles = [general_fields, pandemic_fields, financial_fields]
 
         def compose_defaults():
-            default_general_values = [50, 2, "erdos_renyi", 5]
-            default_pandemic_values = [0.05, 1, 0.1, 5]
+            default_general_values = [50, 5, "erdos_renyi", 5]
+            default_pandemic_values = [0.05, 1, 0.5, 5]
             default_financial_values = [0.05, 1, 0.1, 5.0]
             self.field_defaults = [
                 default_general_values,
@@ -105,6 +112,17 @@ class GUI(Tk):
         compose_defaults()
         compose_expected_input_value_types()
 
+    def find_latest_gif(self, model):
+        output_dir = f"{self.output_dir}/{self.latest_datetime}"
+        gif_file = f"{model}.gif"
+        latest_gif = Path(output_dir).rglob(gif_file)
+
+    def choose_output_directory(self):
+        self.output_dir = askdirectory()
+
+    def print_dir(self):
+        print(self.output_dir)
+
     def compose_output_commands_frame(self, frame):
         frame.update()
         width, height = frame.winfo_width(), frame.winfo_height()
@@ -115,38 +133,48 @@ class GUI(Tk):
         create_label(fr=frame, w=29, t="Outputs", a="n", r=1, rs=1, c=1, cs=3)
         create_separator(fr=frame, o="horizontal", r=2, rs=1, c=1, cs=10, s="ew")
 
-        output_commands = [
-            partial(print, "test"),
-            partial(print, "test"),
-            partial(print, "test"),
-            partial(print, "test"),
-        ]
-        for command in range(0, len(output_commands)):
-            create_label(
-                fr=frame,
-                w=10,
-                t="t",
-                a="center",
-                fo=button_label_font,
-                r=command + 3,
-                rs=1,
-                c=1,
-                cs=1,
-            )
-            create_button(
-                fr=frame,
-                w=3,
-                h=1,
-                t="q",
-                a="center",
-                r=command + 3,
-                rs=1,
-                c=2,
-                cs=1,
-                cmd=output_commands[command],
-                padx=(0, 0),
-                pady=(0, 0),
-            )
+        button_text = ['Show in Frame', 'Storage Dir', 'Export .pngs', 'Export .graphmls']
+        for button in range(0, len(button_text)):
+            pass
+
+        # def compose_pandemic_output_frame(self, frame, button_text):
+        #     pandemic_outputs = Frame(
+        #         frame, width=int(width/2), height=150, background="green"
+        #     )
+        #     pandemic_outputs.grid(
+        #         row=2, rowspan=1, column=1, columnspan=1, sticky="ns"
+        #     )
+        #     pandemic_outputs.pack_propagate(0)
+        #     create_separator(fr=pandemic_outputs, o="horizontal", r=0, rs=1, c=1, cs=10, s="ew")
+        #     create_label(fr=pandemic_outputs, w=14, t="Pandemic", a="n", r=1, rs=1, c=1, cs=3)
+        #     create_separator(fr=pandemic_outputs, o="horizontal", r=2, rs=1, c=1, cs=10, s="ew")
+
+        #     # current_model_output_dir = f"output/{self.latest_datetime}"
+        #     commands = [
+        #         partial(self.load_gif_to_gui, self.graph_frame),
+        #         partial(self.choose_output_directory),
+        #         partial(self.print_dir),
+        #         partial(print, 'test')
+        #     ]
+
+        #     for button in range(0, len(button_text)):
+        #         create_button(fr=pandemic_outputs, w=8, h=1, t=button_text[button], a='center', r=button+3, rs=1, c=1, cs=1, cmd=commands[button], padx=(10,0), pady=(4,0))
+        
+        # def compose_financial_output_frame(self, frame):
+        #     financial_outputs = Frame(
+        #         frame, width=int(width/2), height=150, background="red"
+        #     )
+        #     financial_outputs.grid(
+        #         row=2, rowspan=1, column=2, columnspan=1, sticky="ns"
+        #     )
+        #     create_separator(fr=financial_outputs, o="vertical", r=0, rs=10, c=0, cs=1, s="ns")
+        #     create_separator(fr=financial_outputs, o="horizontal", r=0, rs=1, c=1, cs=10, s="ew")
+        #     create_label(fr=financial_outputs, w=14, t="Financial", a="n", r=1, rs=1, c=1, cs=3)
+        #     create_separator(fr=financial_outputs, o="horizontal", r=2, rs=1, c=1, cs=10, s="ew")
+
+
+        # compose_pandemic_output_frame(self, frame, button_text)
+        # compose_financial_output_frame(self, frame)
 
     def compose_model_commands_frame(self, frame):
         frame.update()
@@ -179,7 +207,8 @@ class GUI(Tk):
                 fr=frame,
                 w=10,
                 t=label_text[command],
-                a="center",
+                a="w",
+                fo=("TkDefaultFont", 12),
                 r=command + 3,
                 rs=1,
                 c=1,
@@ -187,7 +216,7 @@ class GUI(Tk):
             )
             create_button(
                 fr=frame,
-                w=3,
+                w=10,
                 h=1,
                 t=button_text[command],
                 a="center",
@@ -208,8 +237,9 @@ class GUI(Tk):
         create_label(fr=frame, w=20, t="Activity Log", a="w", r=1, rs=1, c=0, cs=1)
         create_separator(fr=frame, o="horizontal", r=2, rs=1, c=0, cs=10, s="ew")
         self.activity_log_textbox = create_textbox(
-            fr=frame, w=90, h=11, r=3, rs=6, c=0, cs=1, s="nesw"
+            fr=frame, w=79, h=11, r=3, rs=6, c=0, cs=1, s="nesw"
         )
+        create_separator(fr=frame, o="vertical", r=0, rs=10, c=10, cs=1, s="ns")
         create_separator(fr=frame, o="horizontal", r=2, rs=1, c=0, cs=10, s="ew")
 
     def compose_input_frame(self, frame):
@@ -218,15 +248,15 @@ class GUI(Tk):
         input_area_width = int(width / 2.99)
 
         general_input_area = Frame(
-            frame, width=input_area_width, height=height, background=""
+            frame, width=input_area_width, height=height, background="#F0F0F0"
         )
         general_input_area.grid(row=0, column=0, sticky="nsew")
         pandemic_input_area = Frame(
-            frame, width=input_area_width, height=height, background="pink"
+            frame, width=input_area_width, height=height, background="#F0F0F0"
         )
         pandemic_input_area.grid(row=0, column=1, sticky="nsew")
         financial_input_area = Frame(
-            frame, width=input_area_width, height=height, background="brown"
+            frame, width=input_area_width, height=height, background="#F0F0F0"
         )
         financial_input_area.grid(row=0, column=2, sticky="nsew")
 
@@ -248,8 +278,6 @@ class GUI(Tk):
         create_separator(
             fr=general_input_area, o="horizontal", r=2, rs=1, c=0, cs=10, s="ew"
         )
-        # create_label(f=general_input_area, w=5, t=self.field_titles[0][0], a='w', r=3, rs=1, c=0, cs=1)
-        # print(general_input_area.winfo_width())
         input_title_width, input_entry_width = 6, 10
         for field in range(0, len(self.field_titles[0])):
             create_label(
@@ -296,7 +324,7 @@ class GUI(Tk):
         create_separator(
             fr=pandemic_input_area, o="horizontal", r=2, rs=1, c=0, cs=10, s="ew"
         )
-        input_title_width, input_entry_width = 15, 5
+        input_title_width, input_entry_width = 16, 5
         for field in range(0, len(self.field_titles[1])):
             create_label(
                 fr=pandemic_input_area,
@@ -341,7 +369,7 @@ class GUI(Tk):
         create_separator(
             fr=financial_input_area, o="horizontal", r=2, rs=1, c=0, cs=10, s="ew"
         )
-        input_title_width, input_entry_width = 15, 5
+        input_title_width, input_entry_width = 14, 5
         for field in range(0, len(self.field_titles[2])):
             create_label(
                 fr=financial_input_area,
@@ -372,8 +400,6 @@ class GUI(Tk):
     def run_model_with_current_entries(self, entries, graph_frame):
         # https://stackoverflow.com/questions/16626789/functools-partial-on-class-method
         # referencing these variables to get around partial/self should be possible when model class is created
-        def get_current_datetime():
-            return strftime("%d.%m.%y/%H:%M:%S")
 
         def get_current_entry_values(entries):
             model_inputs = [[], [], []]
@@ -387,21 +413,41 @@ class GUI(Tk):
         def validate_input_values():
             pass
 
-        self.latest_datetime = get_current_datetime()
-        output_dir = f"output/{self.latest_datetime}"
+        self.latest_datetime = self.get_current_datetime()
+        output_dir = f"{self.output_dir}/{self.latest_datetime}"
 
         #  if validate_entries(entries, defaults):
         model_inputs = get_current_entry_values(entries)
-        compound_model = Model(output_dir=output_dir, options=model_inputs)
-        compound_model.auto_run()
-        print(compound_model.latest_run_time)
+        compound_model = Model(output_dir=output_dir, options=model_inputs, log=self.activity_log_textbox)
+        self.activity_log_textbox.insert(END, 'Processing\n')
+        thread = threading.Thread(target = compound_model.auto_run()) 
+        while(thread.is_alive()):
+            print('test')
+            self.activity_log_textbox.insert(END, '.')
+            sleep(0.1)
+            self.update()
         self.latest_pandemic_model_gif = compound_model.latest_pandemic_gif
         self.latest_financial_model_gif = compound_model.latest_financial_gif
+        self.gif_to_load = 'pandemic'
+        self.load_gif_to_gui(gui_frame = self.graph_frame)
+        
 
-        self.load_gif_to_gui(self.graph_frame, self.latest_pandemic_model_gif)
+    def get_current_datetime(self):
+        return strftime("%d.%m.%y/%H:%M:%S")
 
-    def load_gif_to_gui(self, gui_frame, gif_path):
-        graph_image_label = ImageLabel(gui_frame)
+    def load_gif_to_gui(self, gui_frame):
+        print('test:', self.gif_to_load)
+        # def find_latest_gif(self, model):
+        #     latest_gif = glob.glob(f"{self.output_dir}/{self.latest_datetime}/*{model}.gif", recursive=True)[0]
+        #     return latest_gif
+        if self.gif_to_load == 'pandemic': 
+            gif_path = self.latest_pandemic_model_gif 
+            self.gif_to_load = 'financial'
+        elif self.gif_to_load == 'financial': 
+            gif_path = self.latest_financial_model_gif
+            self.gif_to_load = 'pandemic'
+
+        graph_image_label = GIF(gui_frame)
         graph_image_label.load(gif_path)
         graph_image_label.grid(row=0, column=0, sticky="nesw")
         return graph_image_label
@@ -423,7 +469,7 @@ class GUI(Tk):
 
 
 def create_label(fr, w, t, a, r, rs, c, cs, fo=("TkDefaultFont", 12)):
-    label = Label(fr, width=w, text=t, anchor=a, font=fo)
+    label = Label(fr, width=w, text=t, anchor=a, background="#F0F0F0", font=fo)
     label.grid(row=r, column=c, rowspan=rs, columnspan=cs)
 
 
@@ -435,7 +481,7 @@ def create_entry(fr, w, s, d, r, c, fo=("TkDefaultFont", 12)):
 
 
 def create_button(fr, w, h, t, a, cmd, r, rs, c, cs, padx, pady, fo=("TkMenuFont", 12)):
-    button = Button(fr, width=w, height=h, text=t, font=fo, anchor=a, command=cmd)
+    button = Button(fr, width=w, height=h, text=t, font=fo, anchor=a, background="#F0F0F0", command=cmd)
     button.grid(row=r, rowspan=rs, column=c, columnspan=cs, padx=padx, pady=pady)
     # return button
 
@@ -445,8 +491,15 @@ def create_textbox(fr, w, h, r, rs, c, cs, s):
     textbox.grid(row=r, rowspan=rs, column=c, sticky=s)
     textbox_scrollbar = Scrollbar(width=4, command=textbox.yview)
     textbox["yscrollcommand"] = textbox_scrollbar.set
+    
     return textbox
 
+def create_listbox(fr, w, h, r, rs, c, cs, s):
+    listbox = Listbox(fr, width=w, height=h, state="disabled")
+    listbox.grid(row=r, rowspan=rs, column=c, sticky=s)
+    listbox_scrollbar = Scrollbar(width=4, command=listbox.yview)
+    listbox["yscrollcommand"] = listbox_scrollbar.set
+    return listbox
 
 def create_separator(fr, o, r, rs, c, cs, s):
     separator = tkinter.ttk.Separator(fr, orient=o)
@@ -458,20 +511,22 @@ def print_to_activity_log(activity_log, message):
     # Fade existing text - TO DO
     activity_log.configure(fg="black")
     # Highlight new text - TO DO
-    activity_log.insert(END, f"\n{message}")
+    activity_log.insert(END, f"{message}\n")
 
 
 # Source: https://stackoverflow.com/questions/43770847/play-an-animated-gif-in-python-with-tkinter
-class ImageLabel(Label):
+class GIF(Label):
     def load(self, image):
+        # image = 
+        print(image)
         if isinstance(image, str):
-            image = Image.open(image)
+            image = PIL.Image.open(image)
         self.loc = 0
         self.frames = []
 
         try:
             for i in count(1):
-                self.frames.append(ImageTk.PhotoImage(image.copy()))
+                self.frames.append(PIL.ImageTk.PhotoImage(image.copy()))
                 image.seek(i)
         except EOFError:
             pass
