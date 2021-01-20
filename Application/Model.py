@@ -185,6 +185,14 @@ class Model:
         return condition_counter
 
     def run_pandemic_model(self, graph, transmission_rate, time_to_recover):
+        
+        def update_edge_fill_colour(condition: str):
+            return {
+                "susceptible": "#00FF00",
+                "infectious": "#FF0000",
+                "removed": "#d3d3d3",
+            }.get(condition, '#CCCCCC')
+        
         transmission_rate, time_to_recover = transmission_rate, time_to_recover
         time_before_becoming_contagious = ceil(time_to_recover / 5)
         # print(time_before_becoming_contagious)
@@ -194,15 +202,16 @@ class Model:
             for edge in graph.edges(agent):
                 (source_node, target_node) = edge
                 if graph.nodes[source_node]["time_exposed"] > time_to_recover:
+                    graph.edges[edge]['edge_colour'] = update_edge_fill_colour('default')
                     graph.nodes[source_node]["condition"] = "removed"
                     graph.nodes[source_node]["able_to_recover"] = False
-                if graph.nodes[source_node]["condition"] == "infectious":
+                if graph.nodes[source_node]["condition"] == "infectious":                    
                     # print(graph.nodes[source_node]["time_exposed"])
                     # print(graph.nodes[agent]["able_to_recover"])
                     # var. show to time before becoming infectious to others
                     if (
                         graph.nodes[source_node]["time_exposed"]
-                        > 1
+                        > time_before_becoming_contagious
                     ):
                         # print(f"{graph.nodes[source_node]['location']}:{graph.nodes[source_node]['condition']}")
                         if graph.nodes[target_node]["condition"] == "susceptible":
@@ -217,6 +226,7 @@ class Model:
                             # print(f"{graph.nodes[target_node]['location']}'s chance to be infected is {chance_of_transmission}")
                             # print(chance_of_transmission)
                             if transmission_rate - chance_of_transmission >= 0.00:
+                                graph.edges[edge]['edge_colour'] = update_edge_fill_colour('infectious')
                                 # print(f"{graph.nodes[source_node]['location']} infected {graph.nodes[target_node]['location']}")
                                 graph.nodes[target_node]["condition"] = "infectious"
                                 graph.nodes[target_node]["able_to_recover"] = False
@@ -227,6 +237,7 @@ class Model:
                         time_exposed = graph.nodes[agent]["time_exposed"]
                         graph.nodes[agent]["time_exposed"] = time_exposed + 1
                         graph.nodes[agent]["able_to_recover"] = False
+
         return graph
 
     def run_financial_model(self, graph, lockdown_severity, loan_threshold):
@@ -283,28 +294,21 @@ class Model:
                         if graph.nodes[source_node]["financial_impact"] == "bust":
                             print(f"Node {source_node} is bust")
                         else:
-                            financial_damage = (
+                            graph.nodes[source_node][
+                                "financial_impact"
+                            ] = (
                                 graph.nodes[source_node]["current_asset_value"]
                                 / graph.nodes[source_node]["initial_asset_value"]
                             )
-                            graph.nodes[source_node][
-                                "financial_impact"
-                            ] = self.update_financial_status(financial_damage)
+                            # graph.nodes[source_node][
+                            #     "financial_impact"
+                            # ] = self.update_financial_status(financial_damage)
                         # aka go bust
 
+                        # need to add edge colouration for this model
 
         return graph
+    
+    
 
-    def update_financial_status(self, impact: float):
-        if impact == 1.0:
-            return "none"
-        elif impact < 1.0 and impact >= 0.75:
-            return "minor"
-        elif impact < 0.75 and impact >= 0.5:
-            return "intermediate"
-        elif impact < 0.5 and impact >= 0.25:
-            return "major"
-        elif impact < 0.25 and impact >= 0.0:
-            return "critical"
-        else:
-            return "bust"
+
