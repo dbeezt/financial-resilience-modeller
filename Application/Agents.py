@@ -10,7 +10,6 @@ class AgentPopulation:
         agents = DataFrame(
             index=range(0, num_of_agents),
             columns=[
-                "location",
                 "condition",
                 "time_exposed",
                 "financial_impact",
@@ -18,14 +17,9 @@ class AgentPopulation:
                 "current_asset_value",
             ]
         )
-        locations = []
-        for index in range(0, len(agents)):
-            locations.append(f"Bank{index}")
-
-        agents["location"] = locations
         agents["condition"] = "susceptible"
         agents["time_exposed"] = 0
-        agents["financial_impact"] = "none"
+        agents["financial_impact"] = 1.0
         agents["initial_asset_value"] = 100000000.00
         agents["current_asset_value"] = agents["initial_asset_value"]
 
