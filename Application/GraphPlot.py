@@ -42,8 +42,8 @@ class GraphPlot:
             node_hover_tool = HoverTool(
                 tooltips=[
                     ("Index", "@index"),
-                    ("Location", "@location"),
-                    ("TimeExposed", "@time_exposed"),
+                    ("Time Exposed", "@time_exposed"),
+                    ("Financial Impact", "@financial_impact"),
                 ],
                 show_arrow=False,
                 point_policy="follow_mouse",
@@ -63,10 +63,10 @@ class GraphPlot:
             self.graph.graph, self.coords, scale=1, center=(0, 0), pos=self.coords
         )
         graph_renderer.node_renderer.glyph = Circle(
-            size="node_size", fill_color="node_colour", fill_alpha="financial_indicator"
+            size="node_size", fill_color="node_colour", fill_alpha="financial_impact"
         )
         graph_renderer.edge_renderer.glyph = MultiLine(
-            line_color="edge_colour", line_alpha=1, line_width=0.8
+            line_color="edge_colour", line_alpha=0.66, line_width=0.75
         )
 
         if interactive:
@@ -75,12 +75,12 @@ class GraphPlot:
             graph_renderer.node_renderer.selection_glyph = Circle(
                 size="node_size",
                 fill_color=hover_colour,
-                fill_alpha="financial_indicator",
+                fill_alpha="financial_impact",
             )
             graph_renderer.node_renderer.hover_glyph = Circle(
                 size="node_size",
                 fill_color=hover_colour,
-                fill_alpha="financial_indicator",
+                fill_alpha="financial_impact",
             )
             graph_renderer.node_renderer.glyph.properties_with_values()
 
