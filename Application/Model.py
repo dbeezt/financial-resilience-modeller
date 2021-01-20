@@ -2,10 +2,10 @@ from collections import Counter
 from math import floor, ceil
 from os import makedirs
 from time import sleep, strftime
-from .Agents import AgentPopulation
-from .Graph import Graph
-from .GraphPlot import GraphPlot
-from .DataPlot import DataPlot
+from Agents import AgentPopulation
+from Graph import Graph
+from GraphPlot import GraphPlot
+from DataPlot import DataPlot
 import glob, random
 import PIL.Image
 import networkx as nx

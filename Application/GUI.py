@@ -1,8 +1,8 @@
-import PIL.Image, PIL.ImageTk
+import PIL.ImageTk, PIL.Image
 import threading, tkinter.ttk
 from functools import partial
 from itertools import count
-from Application.Model import Model
+from Model import Model
 from pathlib import Path
 import glob
 from tkinter import *
