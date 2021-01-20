@@ -4,9 +4,13 @@ Interface to an agent-based model aimed at examining shock propagation between f
 
 
 ### Development
-```poetry shell
-poetry run python Application/GUI.py```
+```
+poetry shell
+poetry run python Application/GUI.py
+```
 
 #### House-keeping
-```poetry run black Application/*
-poetry run pylint Application/*```
+```
+poetry run black Application/*
+poetry run pylint Application/*
+```
