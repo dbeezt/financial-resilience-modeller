@@ -1,14 +1,15 @@
-from collections import Counter
-from math import floor, ceil
-from os import makedirs
-from time import sleep, strftime
+import collections
+import glob
+import math
+import networkx as nx
+import os
+import PIL
+import random
+import time
 from Agents import AgentPopulation
 from Graph import Graph
 from GraphPlot import GraphPlot
 from DataPlot import DataPlot
-import glob, random
-import PIL.Image
-import networkx as nx
 
 
 class Model:
@@ -18,7 +19,7 @@ class Model:
         self.graphml_export_path = f"{self.output_dir}/graphs"
         self.plot_export_path = f"{self.output_dir}/plots"
         self.stats_export_path = f"{self.output_dir}/stats"
-        self.latest_run_time = strftime("%H:%M:%S")
+        self.latest_run_time = time.strftime("%H:%M:%S")
         self.condition_count_per_iteration = []
         self.financial_impact_count_per_iteration = []
         self.enforce_input_value_data_types(options)
@@ -27,7 +28,6 @@ class Model:
 
     # def print_to_log(self, log, message):
     #     log.insert('end', f"{message}\n")
-
 
     def enforce_input_value_data_types(self, options):
         self.total_agents = int(options[0][0])
@@ -49,7 +49,7 @@ class Model:
         # if we persist the attribute values of node sizes, it means
         # either financial uses node (degree) sizes of pandemic of vice versa
         # would we rather see node size represented by geographic or financial significance?
-        # infected_agents = floor(self.total_agents/50)
+        # infected_agents = math.floor(self.total_agents/50)
         infected_agents = 1
         agents = AgentPopulation(self.total_agents, infected_agents).agents
         pandemic = Graph(agents, self.pandemic_cohesion, self.graph_type, self.seed)
@@ -66,28 +66,26 @@ class Model:
 
         node_positions = nx.spring_layout(pandemic.graph, k=0.5, seed=self.seed)
         GraphPlot(
-            title=f"PANDEMIC MODEL: Cycle 0.0",
+            title='PANDEMIC MODEL: Cycle 0.0',
             graph=pandemic,
             coords=node_positions,
-            export_path=self.concat_plot_write_path(
-                        'network', 'pandemic', 0, 0
-                    )
+            export_path=self.concat_plot_write_path("network", "pandemic", 0, 0),
         ).render_and_export_graph()
         GraphPlot(
-            title=f"FINANCIAL MODEL: Cycle 0.0",
+            title='FINANCIAL MODEL: Cycle 0.0',
             graph=financial,
             coords=node_positions,
-            export_path=self.concat_plot_write_path(
-                        'network', 'financial', 0, 0
-                    )
+            export_path=self.concat_plot_write_path("network", "financial", 0, 0),
         ).render_and_export_graph()
-        pandemic.compose_and_write_csv_of_graph_data(alt_graph=financial.graph, output_path=self.concat_csv_write_path(0, 0))
+        pandemic.compose_and_write_csv_of_graph_data(
+            alt_graph=financial.graph, output_path=self.concat_csv_write_path(0, 0)
+        )
 
         for cycle in range(0, self.model_cycles):
             # Used for generating iterative seed when performing random interaction checks
             self.cycle = cycle
             print(f"Cycle #{cycle + 1}")
-            self.latest_run_time = strftime("%H:%M:%S")
+            self.latest_run_time = time.strftime("%H:%M:%S")
             for iteration in range(0, self.pandemic_iterations):
                 print(f"  Pandemic Iteration #{cycle + 1}.{iteration + 1}")
                 pandemic.persist_attributes_between_graphs(financial.graph)
@@ -96,17 +94,17 @@ class Model:
                     self.pandemic_transmission_rate,
                     self.pandemic_time_to_recover,
                 )
-                
+
                 GraphPlot(
                     title=f"PANDEMIC MODEL: Cycle {cycle + 1}.{iteration + 1}",
                     graph=pandemic,
                     coords=node_positions,
                     export_path=self.concat_plot_write_path(
-                        'network', 'pandemic', cycle + 1, iteration + 1
-                    )
+                        "network", "pandemic", cycle + 1, iteration + 1
+                    ),
                 ).render_and_export_graph()
                 self.write_graph_to_graphml(
-                    pandemic.graph, 'pandemic', cycle + 1, iteration + 1
+                    pandemic.graph, "pandemic", cycle + 1, iteration + 1
                 )
             self.condition_count_per_iteration.append(
                 self.sum_agent_attributes(pandemic.graph.nodes.data("condition"))
@@ -125,20 +123,22 @@ class Model:
                     graph=financial,
                     coords=node_positions,
                     export_path=self.concat_plot_write_path(
-                        'network', 'financial', cycle + 1, iteration + 1
-                    )
+                        "network", "financial", cycle + 1, iteration + 1
+                    ),
                 ).render_and_export_graph()
                 self.write_graph_to_graphml(
-                    financial.graph, 'financial', cycle + 1, iteration + 1
+                    financial.graph, "financial", cycle + 1, iteration + 1
                 )
                 self.financial_impact_count_per_iteration.append(
                     self.sum_agent_attributes(
                         financial.graph.nodes.data("financial_impact")
                     )
                 )
-            pandemic.compose_and_write_csv_of_graph_data(alt_graph=financial.graph, output_path=self.concat_csv_write_path(cycle + 1, iteration + 1))
-                # f"{graphml_dir_path}/{self.latest_run_time}-{cycle}.{iteration}.graphml"
-
+            pandemic.compose_and_write_csv_of_graph_data(
+                alt_graph=financial.graph,
+                output_path=self.concat_csv_write_path(cycle + 1, iteration + 1),
+            )
+            # f"{graphml_dir_path}/{self.latest_run_time}-{cycle}.{iteration}.graphml"
 
         self.latest_pandemic_gif = self.compose_gif_from_pngs(
             f"{self.plot_export_path}/network/pandemic"
@@ -146,10 +146,11 @@ class Model:
         self.latest_financial_gif = self.compose_gif_from_pngs(
             f"{self.plot_export_path}/network/financial"
         )
-        
-        data_plot = DataPlot(path_to_data = f"{self.stats_export_path}/graph/node_attributes",
-            export_path = f"{self.plot_export_path}/data").create_plot()
 
+        data_plot = DataPlot(
+            path_to_data=f"{self.stats_export_path}/graph/node_attributes",
+            export_path=f"{self.plot_export_path}/data",
+        ).create_plot()
 
     def concat_csv_write_path(self, cycle, iteration):
         return f"{self.stats_export_path}/graph/node_attributes/{self.latest_run_time}-{cycle}.{iteration}.csv"
@@ -159,7 +160,7 @@ class Model:
 
     def write_graph_to_graphml(self, graph, model, cycle, iteration):
         graphml_dir_path = f"{self.graphml_export_path}/{model}"
-        makedirs(graphml_dir_path, exist_ok=True)
+        os.makedirs(graphml_dir_path, exist_ok=True)
         graphml_file_path = (
             f"{graphml_dir_path}/{self.latest_run_time}-{cycle}.{iteration}.graphml"
         )
@@ -181,20 +182,19 @@ class Model:
         return file_out
 
     def sum_agent_attributes(self, attribute):
-        condition_counter = Counter([y for (x, y) in attribute])
+        condition_counter = collections.Counter([y for (x, y) in attribute])
         return condition_counter
 
     def run_pandemic_model(self, graph, transmission_rate, time_to_recover):
-        
         def update_edge_fill_colour(condition: str):
             return {
                 "susceptible": "#00FF00",
                 "infectious": "#FF0000",
                 "removed": "#d3d3d3",
-            }.get(condition, '#CCCCCC')
-        
+            }.get(condition, "#CCCCCC")
+
         transmission_rate, time_to_recover = transmission_rate, time_to_recover
-        time_before_becoming_contagious = ceil(time_to_recover / 5)
+        time_before_becoming_contagious = math.ceil(time_to_recover / 5)
         # print(time_before_becoming_contagious)
         agent_population: int = len(graph.nodes)
         graph.add_nodes_from(graph.nodes, able_to_recover=True)
@@ -202,10 +202,12 @@ class Model:
             for edge in graph.edges(agent):
                 (source_node, target_node) = edge
                 if graph.nodes[source_node]["time_exposed"] > time_to_recover:
-                    graph.edges[edge]['edge_colour'] = update_edge_fill_colour('default')
+                    graph.edges[edge]["edge_colour"] = update_edge_fill_colour(
+                        "default"
+                    )
                     graph.nodes[source_node]["condition"] = "removed"
                     graph.nodes[source_node]["able_to_recover"] = False
-                if graph.nodes[source_node]["condition"] == "infectious":                    
+                if graph.nodes[source_node]["condition"] == "infectious":
                     # print(graph.nodes[source_node]["time_exposed"])
                     # print(graph.nodes[agent]["able_to_recover"])
                     # var. show to time before becoming infectious to others
@@ -226,7 +228,9 @@ class Model:
                             # print(f"{graph.nodes[target_node]['location']}'s chance to be infected is {chance_of_transmission}")
                             # print(chance_of_transmission)
                             if transmission_rate - chance_of_transmission >= 0.00:
-                                graph.edges[edge]['edge_colour'] = update_edge_fill_colour('infectious')
+                                graph.edges[edge][
+                                    "edge_colour"
+                                ] = update_edge_fill_colour("infectious")
                                 # print(f"{graph.nodes[source_node]['location']} infected {graph.nodes[target_node]['location']}")
                                 graph.nodes[target_node]["condition"] = "infectious"
                                 graph.nodes[target_node]["able_to_recover"] = False
@@ -260,7 +264,7 @@ class Model:
                         current_asset_value - reduced_asset_value
                     )
                     # print(
-                        # f"Node{agent}'s wealth reduced by {reduced_asset_value}, from {current_asset_value} to {graph.nodes[agent]['current_asset_value']}"
+                    # f"Node{agent}'s wealth reduced by {reduced_asset_value}, from {current_asset_value} to {graph.nodes[agent]['current_asset_value']}"
                     # )
                 for edge in graph.edges(agent):
                     (source_node, target_node) = edge
@@ -294,9 +298,7 @@ class Model:
                         if graph.nodes[source_node]["financial_impact"] == "bust":
                             print(f"Node {source_node} is bust")
                         else:
-                            graph.nodes[source_node][
-                                "financial_impact"
-                            ] = (
+                            graph.nodes[source_node]["financial_impact"] = (
                                 graph.nodes[source_node]["current_asset_value"]
                                 / graph.nodes[source_node]["initial_asset_value"]
                             )
@@ -308,7 +310,3 @@ class Model:
                         # need to add edge colouration for this model
 
         return graph
-    
-    
-
-

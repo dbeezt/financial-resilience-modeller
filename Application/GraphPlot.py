@@ -1,4 +1,5 @@
-from os import makedirs, path
+import os
+from bokeh.io import export_png
 from bokeh.models import (
     Plot,
     Range1d,
@@ -7,12 +8,10 @@ from bokeh.models import (
     WheelZoomTool,
     SaveTool,
     ResetTool,
-    WheelZoomTool,
     Circle,
     MultiLine,
     NodesAndLinkedEdges,
 )
-from bokeh.io import export_png
 from bokeh.plotting import from_networkx
 
 
@@ -23,6 +22,7 @@ class GraphPlot:
         self.graph = graph
         self.coords = coords
         self.export_path = export_path
+        self.plot = self.create_plot()
 
     def create_plot(self, interactive=False):
         base_plot = Plot(
@@ -51,7 +51,7 @@ class GraphPlot:
             base_plot.add_tools(
                 node_hover_tool, PanTool(), WheelZoomTool(), SaveTool(), ResetTool()
             )
-            base_plot.toolbar.active_scroll = plot.select_one(WheelZoomTool)
+            base_plot.toolbar.active_scroll = base_plot.select_one(WheelZoomTool)
         else:
             base_plot.toolbar_location = None
 
@@ -99,12 +99,11 @@ class GraphPlot:
 
     def export_plot(self, graph_renderer):
         self.plot.renderers.append(graph_renderer)
-        dirs, file = path.split(self.export_path)
-        makedirs(dirs, exist_ok=True)
+        dirs, _ = os.path.split(self.export_path)
+        os.makedirs(dirs, exist_ok=True)
         export_png(self.plot, filename=self.export_path)
 
     def render_and_export_graph(self):
-        self.plot = self.create_plot()
         self.graph.update_visual_attributes()
         graph_renderer = self.create_graph_renderer()
         self.export_plot(graph_renderer=graph_renderer)

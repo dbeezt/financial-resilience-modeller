@@ -15,7 +15,7 @@ class AgentPopulation:
                 "financial_impact",
                 "initial_asset_value",
                 "current_asset_value",
-            ]
+            ],
         )
         agents["condition"] = "susceptible"
         agents["time_exposed"] = 0
@@ -28,6 +28,8 @@ class AgentPopulation:
     def introduce_infected_agents(self, infected_agents):
         infected_agent_indices = self.agents.sample(n=infected_agents, random_state=1)
         for agent in range(0, len(infected_agent_indices)):
-            infected_agent_index = self.agents.index.get_loc(infected_agent_indices.iloc[agent].name)
+            infected_agent_index = self.agents.index.get_loc(
+                infected_agent_indices.iloc[agent].name
+            )
             self.agents.at[infected_agent_index, "condition"] = "infectious"
             self.agents.at[infected_agent_index, "time_exposed"] = 1

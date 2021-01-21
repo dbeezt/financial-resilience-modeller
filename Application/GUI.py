@@ -1,15 +1,17 @@
-import PIL.ImageTk, PIL.Image
-import threading, tkinter.ttk
-from functools import partial
-from itertools import count
-from Model import Model
-from pathlib import Path
+import functools
+import itertools
 import glob
-from tkinter import *
-from tkinter.filedialog import askdirectory
-from time import strftime
+import pathlib
+import PIL.Image
+import PIL.ImageTk
+import tkinter as tk
+import tkinter.ttk
+import threading
+import time
+from Model import Model
 
-class GUI(Tk):
+
+class GUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.create_window()
@@ -23,26 +25,28 @@ class GUI(Tk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.resizable(False, False)
-        self.output_dir = 'output'
-        self.latest_datetime = self.get_current_datetime()
-        self.latest_pandemic_model_gif = ''
-        self.latest_financial_model_gif = ''
+        self.output_dir = "output"
+        self.latest_datetime = time.strftime("%d.%m.%y/%H:%M:%S")
+        self.latest_pandemic_model_gif = ""
+        self.latest_financial_model_gif = ""
         self.output_plot_dirs = []
         self.output_stats_dirs = []
 
     def create_and_position_frames(self):
         self.prepare_input_fields()
 
-        self.graph_frame = Frame(self, width=self.width, height=500, background="#F0F0F0")
+        self.graph_frame = tk.Frame(
+            self, width=self.width, height=500, background="#F0F0F0"
+        )
         self.graph_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
-        log_frame = Frame(
+        log_frame = tk.Frame(
             self, width=int(self.width * 0.7), height=150, background="#F0F0F0"
         )
         log_frame.grid(row=1, column=0, columnspan=1, sticky="ns")
         self.compose_log_frame(log_frame)
 
-        output_commands_frame = Frame(
+        output_commands_frame = tk.Frame(
             self, width=int(self.width * 0.3), height=150, background="#F0F0F0"
         )
         output_commands_frame.grid(
@@ -50,13 +54,13 @@ class GUI(Tk):
         )
         self.compose_output_commands_frame(output_commands_frame)
 
-        input_frame = Frame(
+        input_frame = tk.Frame(
             self, width=int(self.width * 0.7), height=150, background="#F0F0F0"
         )
         input_frame.grid(row=2, column=0, columnspan=1, sticky="nsew")
         self.compose_input_frame(input_frame)
 
-        model_commands_frame = Frame(
+        model_commands_frame = tk.Frame(
             self, width=int(self.width * 0.3), height=150, background="#F0F0F0"
         )
         model_commands_frame.grid(row=2, rowspan=1, column=1, columnspan=1, sticky="ns")
@@ -115,27 +119,75 @@ class GUI(Tk):
     def find_latest_gif(self, model):
         output_dir = f"{self.output_dir}/{self.latest_datetime}"
         gif_file = f"{model}.gif"
-        latest_gif = Path(output_dir).rglob(gif_file)
+        latest_gif = pathlib.Path(output_dir).rglob(gif_file)
 
     def choose_output_directory(self):
-        self.output_dir = askdirectory()
+        self.output_dir = tk.filedialog.askdirectory()
 
     def print_dir(self):
         print(self.output_dir)
 
     def compose_output_commands_frame(self, frame):
-        frame.update()
-        width, height = frame.winfo_width(), frame.winfo_height()
-        button_label_font = ("TkDefaultFont", 12)
+        create_separator(
+            frame=frame,
+            orientation="vertical",
+            row=0,
+            rowspan=10,
+            column=0,
+            columnspan=1,
+            sticky="ns",
+        )
+        create_separator(
+            frame=frame,
+            orientation="horizontal",
+            row=0,
+            rowspan=1,
+            column=1,
+            columnspan=10,
+            sticky="ew",
+        )
+        create_label(
+            frame=frame,
+            width=29,
+            text="Outputs",
+            anchor="n",
+            row=1,
+            rowspan=1,
+            column=1,
+            columnspan=3,
+        )
+        create_separator(
+            frame=frame,
+            orientation="horizontal",
+            row=2,
+            rowspan=1,
+            column=1,
+            columnspan=10,
+            sticky="ew",
+        )
 
-        create_separator(fr=frame, o="vertical", r=0, rs=10, c=0, cs=1, s="ns")
-        create_separator(fr=frame, o="horizontal", r=0, rs=1, c=1, cs=10, s="ew")
-        create_label(fr=frame, w=29, t="Outputs", a="n", r=1, rs=1, c=1, cs=3)
-        create_separator(fr=frame, o="horizontal", r=2, rs=1, c=1, cs=10, s="ew")
+        output_button_text = ["Switch Shown Graph", "Set Output Location"]
+        output_button_commands = [
+            functools.partial(self.load_gif_to_gui, self.graph_frame),
+            functools.partial(self.choose_output_directory),
+        ]
+        for button in range(0, len(output_button_text)):
+            create_button(
+                frame=frame,
+                width=22,
+                height=1,
+                text=output_button_text[button],
+                anchor="center",
+                row=button + 3,
+                rowspan=1,
+                column=1,
+                columnspan=4,
+                command=output_button_commands[button],
+                padx=(10, 0),
+                pady=(4, 0),
+            )
 
-        button_text = ['Show in Frame', 'Storage Dir', 'Export .pngs', 'Export .graphmls']
-        for button in range(0, len(button_text)):
-            pass
+        # output_settings_button_text
 
         # def compose_pandemic_output_frame(self, frame, button_text):
         #     pandemic_outputs = Frame(
@@ -145,21 +197,21 @@ class GUI(Tk):
         #         row=2, rowspan=1, column=1, columnspan=1, sticky="ns"
         #     )
         #     pandemic_outputs.pack_propagate(0)
-        #     create_separator(fr=pandemic_outputs, o="horizontal", r=0, rs=1, c=1, cs=10, s="ew")
-        #     create_label(fr=pandemic_outputs, w=14, t="Pandemic", a="n", r=1, rs=1, c=1, cs=3)
-        #     create_separator(fr=pandemic_outputs, o="horizontal", r=2, rs=1, c=1, cs=10, s="ew")
+        #     create_separator(frame=pandemic_outputs, orientation="horizontal", row=0, rowspan=1, column=1, columnspan=10, sticky="ew")
+        #     create_label(frame=pandemic_outputs, width=14, text="Pandemic", anchor="n", row=1, rowspan=1, column=1, columnspan=3)
+        #     create_separator(frame=pandemic_outputs, orientation="horizontal", row=2, rowspan=1, column=1, columnspan=10, sticky="ew")
 
         #     # current_model_output_dir = f"output/{self.latest_datetime}"
         #     commands = [
-        #         partial(self.load_gif_to_gui, self.graph_frame),
-        #         partial(self.choose_output_directory),
-        #         partial(self.print_dir),
-        #         partial(print, 'test')
+        #         functools.partial(self.load_gif_to_gui, self.graph_frame),
+        #         functools.partial(self.choose_output_directory),
+        #         functools.partial(self.print_dir),
+        #         functools.partial(print, 'test')
         #     ]
 
         #     for button in range(0, len(button_text)):
-        #         create_button(fr=pandemic_outputs, w=8, h=1, t=button_text[button], a='center', r=button+3, rs=1, c=1, cs=1, cmd=commands[button], padx=(10,0), pady=(4,0))
-        
+        #         create_button(frame=pandemic_outputs, width=8, height=1, text=button_text[button], anchor='center', row=button+3, rowspan=1, column=1, columnspan=1, command=commands[button], padx=(10,0), pady=(4,0))
+
         # def compose_financial_output_frame(self, frame):
         #     financial_outputs = Frame(
         #         frame, width=int(width/2), height=150, background="red"
@@ -167,35 +219,64 @@ class GUI(Tk):
         #     financial_outputs.grid(
         #         row=2, rowspan=1, column=2, columnspan=1, sticky="ns"
         #     )
-        #     create_separator(fr=financial_outputs, o="vertical", r=0, rs=10, c=0, cs=1, s="ns")
-        #     create_separator(fr=financial_outputs, o="horizontal", r=0, rs=1, c=1, cs=10, s="ew")
-        #     create_label(fr=financial_outputs, w=14, t="Financial", a="n", r=1, rs=1, c=1, cs=3)
-        #     create_separator(fr=financial_outputs, o="horizontal", r=2, rs=1, c=1, cs=10, s="ew")
-
+        #     create_separator(frame=financial_outputs, orientation="vertical", row=0, rowspan=10, column=0, columnspan=1, sticky="ns")
+        #     create_separator(frame=financial_outputs, orientation="horizontal", row=0, rowspan=1, column=1, columnspan=10, sticky="ew")
+        #     create_label(frame=financial_outputs, width=14, text="Financial", anchor="n", row=1, rowspan=1, column=1, columnspan=3)
+        #     create_separator(frame=financial_outputs, orientation="horizontal", row=2, rowspan=1, column=1, columnspan=10, sticky="ew")
 
         # compose_pandemic_output_frame(self, frame, button_text)
         # compose_financial_output_frame(self, frame)
 
     def compose_model_commands_frame(self, frame):
-        frame.update()
-        width, height = frame.winfo_width(), frame.winfo_height()
-
-        create_separator(fr=frame, o="vertical", r=0, rs=10, c=0, cs=1, s="ns")
-        create_separator(fr=frame, o="horizontal", r=0, rs=1, c=1, cs=10, s="ew")
-        create_label(fr=frame, w=29, t="Commands", a="n", r=1, rs=1, c=1, cs=3)
-        create_separator(fr=frame, o="horizontal", r=2, rs=1, c=1, cs=10, s="ew")
+        create_separator(
+            frame=frame,
+            orientation="vertical",
+            row=0,
+            rowspan=10,
+            column=0,
+            columnspan=1,
+            sticky="ns",
+        )
+        create_separator(
+            frame=frame,
+            orientation="horizontal",
+            row=0,
+            rowspan=1,
+            column=1,
+            columnspan=10,
+            sticky="ew",
+        )
+        create_label(
+            frame=frame,
+            width=29,
+            text="Commands",
+            anchor="n",
+            row=1,
+            rowspan=1,
+            column=1,
+            columnspan=3,
+        )
+        create_separator(
+            frame=frame,
+            orientation="horizontal",
+            row=2,
+            rowspan=1,
+            column=1,
+            columnspan=10,
+            sticky="ew",
+        )
 
         label_text = ["Run", "Reset"]
         button_text = ["Ctrl + ↩", "Ctrl + R"]
         keybindings = ["<Control-Return>", "<Control-r>"]
 
         model_commands = [
-            partial(
+            functools.partial(
                 self.run_model_with_current_entries,
                 self.field_entries,
                 self.graph_frame,
             ),
-            partial(
+            functools.partial(
                 self.reset_inputs,
                 self.field_entries,
                 self.field_defaults,
@@ -204,27 +285,27 @@ class GUI(Tk):
         ]
         for command in range(0, len(model_commands)):
             create_label(
-                fr=frame,
-                w=10,
-                t=label_text[command],
-                a="w",
-                fo=("TkDefaultFont", 12),
-                r=command + 3,
-                rs=1,
-                c=1,
-                cs=1,
+                frame=frame,
+                width=10,
+                text=label_text[command],
+                anchor="w",
+                font=("TkDefaultFont", 12),
+                row=command + 3,
+                rowspan=1,
+                column=1,
+                columnspan=1,
             )
             create_button(
-                fr=frame,
-                w=10,
-                h=1,
-                t=button_text[command],
-                a="center",
-                r=command + 3,
-                rs=1,
-                c=2,
-                cs=1,
-                cmd=model_commands[command],
+                frame=frame,
+                width=10,
+                height=1,
+                text=button_text[command],
+                anchor="center",
+                row=command + 3,
+                rowspan=1,
+                column=2,
+                columnspan=1,
+                command=model_commands[command],
                 padx=(0, 0),
                 pady=(0, 0),
             )
@@ -233,168 +314,270 @@ class GUI(Tk):
     def compose_log_frame(self, frame):
         frame.update()
         width, height = frame.winfo_width(), frame.winfo_height()
-        create_separator(fr=frame, o="horizontal", r=0, rs=1, c=0, cs=10, s="ew")
-        create_label(fr=frame, w=20, t="Activity Log", a="w", r=1, rs=1, c=0, cs=1)
-        create_separator(fr=frame, o="horizontal", r=2, rs=1, c=0, cs=10, s="ew")
-        self.activity_log_textbox = create_textbox(
-            fr=frame, w=79, h=11, r=3, rs=6, c=0, cs=1, s="nesw"
+        create_separator(
+            frame=frame,
+            orientation="horizontal",
+            row=0,
+            rowspan=1,
+            column=0,
+            columnspan=10,
+            sticky="ew",
         )
-        create_separator(fr=frame, o="vertical", r=0, rs=10, c=10, cs=1, s="ns")
-        create_separator(fr=frame, o="horizontal", r=2, rs=1, c=0, cs=10, s="ew")
+        create_label(
+            frame=frame,
+            width=20,
+            text="Activity Log",
+            anchor="w",
+            row=1,
+            rowspan=1,
+            column=0,
+            columnspan=1,
+        )
+        create_separator(
+            frame=frame,
+            orientation="horizontal",
+            row=2,
+            rowspan=1,
+            column=0,
+            columnspan=10,
+            sticky="ew",
+        )
+        self.activity_log_textbox = create_textbox(
+            frame=frame,
+            width=79,
+            height=11,
+            row=3,
+            rowspan=6,
+            column=0,
+            columnspan=1,
+            sticky="nesw",
+        )
+        create_separator(
+            frame=frame,
+            orientation="vertical",
+            row=0,
+            rowspan=10,
+            column=10,
+            columnspan=1,
+            sticky="ns",
+        )
+        create_separator(
+            frame=frame,
+            orientation="horizontal",
+            row=2,
+            rowspan=1,
+            column=0,
+            columnspan=10,
+            sticky="ew",
+        )
 
     def compose_input_frame(self, frame):
         frame.update()
         width, height = frame.winfo_width(), frame.winfo_height()
         input_area_width = int(width / 2.99)
 
-        general_input_area = Frame(
+        general_input_area = tk.Frame(
             frame, width=input_area_width, height=height, background="#F0F0F0"
         )
         general_input_area.grid(row=0, column=0, sticky="nsew")
-        pandemic_input_area = Frame(
+        pandemic_input_area = tk.Frame(
             frame, width=input_area_width, height=height, background="#F0F0F0"
         )
         pandemic_input_area.grid(row=0, column=1, sticky="nsew")
-        financial_input_area = Frame(
+        financial_input_area = tk.Frame(
             frame, width=input_area_width, height=height, background="#F0F0F0"
         )
         financial_input_area.grid(row=0, column=2, sticky="nsew")
 
         area_title_font, field_title_font = ("TkDefaultFont", 12), ("TkDefaultFont", 11)
         create_separator(
-            fr=general_input_area, o="horizontal", r=0, rs=1, c=0, cs=10, s="ew"
+            frame=general_input_area,
+            orientation="horizontal",
+            row=0,
+            rowspan=1,
+            column=0,
+            columnspan=10,
+            sticky="ew",
         )
         create_label(
-            fr=general_input_area,
-            w=20,
-            t="General",
-            a="center",
-            fo=area_title_font,
-            r=1,
-            rs=1,
-            c=0,
-            cs=2,
+            frame=general_input_area,
+            width=20,
+            text="General",
+            anchor="center",
+            font=area_title_font,
+            row=1,
+            rowspan=1,
+            column=0,
+            columnspan=2,
         )
         create_separator(
-            fr=general_input_area, o="horizontal", r=2, rs=1, c=0, cs=10, s="ew"
+            frame=general_input_area,
+            orientation="horizontal",
+            row=2,
+            rowspan=1,
+            column=0,
+            columnspan=10,
+            sticky="ew",
         )
         input_title_width, input_entry_width = 6, 10
         for field in range(0, len(self.field_titles[0])):
             create_label(
-                fr=general_input_area,
-                w=input_title_width,
-                t=self.field_titles[0][field],
-                a="e",
-                fo=field_title_font,
-                r=field + 3,
-                rs=1,
-                c=0,
-                cs=1,
+                frame=general_input_area,
+                width=input_title_width,
+                text=self.field_titles[0][field],
+                anchor="e",
+                font=field_title_font,
+                row=field + 3,
+                rowspan=1,
+                column=0,
+                columnspan=1,
             )
             entry = create_entry(
-                fr=general_input_area,
-                w=input_entry_width,
-                s="normal",
-                fo=field_title_font,
-                d=self.field_defaults[0][field],
-                r=field + 3,
-                c=1,
+                frame=general_input_area,
+                width=input_entry_width,
+                state="normal",
+                font=field_title_font,
+                default=self.field_defaults[0][field],
+                row=field + 3,
+                column=1,
             )
             # Record the entry object so we can access its value later using entry[0][x].get()
             self.field_entries[0].append(entry)
         self.field_entries[0][2].config(state="disabled")
         create_separator(
-            fr=general_input_area, o="vertical", r=0, rs=10, c=3, cs=1, s="ns"
+            frame=general_input_area,
+            orientation="vertical",
+            row=0,
+            rowspan=10,
+            column=3,
+            columnspan=1,
+            sticky="ns",
         )
 
         create_separator(
-            fr=pandemic_input_area, o="horizontal", r=0, rs=1, c=0, cs=10, s="ew"
+            frame=pandemic_input_area,
+            orientation="horizontal",
+            row=0,
+            rowspan=1,
+            column=0,
+            columnspan=10,
+            sticky="ew",
         )
         create_label(
-            fr=pandemic_input_area,
-            w=24,
-            t="Pandemic",
-            a="center",
-            fo=area_title_font,
-            r=1,
-            rs=1,
-            c=0,
-            cs=2,
+            frame=pandemic_input_area,
+            width=24,
+            text="Pandemic",
+            anchor="center",
+            font=area_title_font,
+            row=1,
+            rowspan=1,
+            column=0,
+            columnspan=2,
         )
         create_separator(
-            fr=pandemic_input_area, o="horizontal", r=2, rs=1, c=0, cs=10, s="ew"
+            frame=pandemic_input_area,
+            orientation="horizontal",
+            row=2,
+            rowspan=1,
+            column=0,
+            columnspan=10,
+            sticky="ew",
         )
         input_title_width, input_entry_width = 16, 5
         for field in range(0, len(self.field_titles[1])):
             create_label(
-                fr=pandemic_input_area,
-                w=input_title_width,
-                t=self.field_titles[1][field],
-                a="e",
-                fo=field_title_font,
-                r=field + 3,
-                rs=1,
-                c=0,
-                cs=1,
+                frame=pandemic_input_area,
+                width=input_title_width,
+                text=self.field_titles[1][field],
+                anchor="e",
+                font=field_title_font,
+                row=field + 3,
+                rowspan=1,
+                column=0,
+                columnspan=1,
             )
             entry = create_entry(
-                fr=pandemic_input_area,
-                w=input_entry_width,
-                s="normal",
-                fo=field_title_font,
-                d=self.field_defaults[1][field],
-                r=field + 3,
-                c=1,
+                frame=pandemic_input_area,
+                width=input_entry_width,
+                state="normal",
+                font=field_title_font,
+                default=self.field_defaults[1][field],
+                row=field + 3,
+                column=1,
             )
             # Record the entry object so we can access its value later using entry[0][x].get()
             self.field_entries[1].append(entry)
         create_separator(
-            fr=pandemic_input_area, o="vertical", r=0, rs=10, c=3, cs=1, s="ns"
+            frame=pandemic_input_area,
+            orientation="vertical",
+            row=0,
+            rowspan=10,
+            column=3,
+            columnspan=1,
+            sticky="ns",
         )
 
         create_separator(
-            fr=financial_input_area, o="horizontal", r=0, rs=1, c=0, cs=10, s="ew"
+            frame=financial_input_area,
+            orientation="horizontal",
+            row=0,
+            rowspan=1,
+            column=0,
+            columnspan=10,
+            sticky="ew",
         )
         create_label(
-            fr=financial_input_area,
-            w=24,
-            t="Financial",
-            a="center",
-            fo=area_title_font,
-            r=1,
-            rs=1,
-            c=0,
-            cs=2,
+            frame=financial_input_area,
+            width=24,
+            text="Financial",
+            anchor="center",
+            font=area_title_font,
+            row=1,
+            rowspan=1,
+            column=0,
+            columnspan=2,
         )
         create_separator(
-            fr=financial_input_area, o="horizontal", r=2, rs=1, c=0, cs=10, s="ew"
+            frame=financial_input_area,
+            orientation="horizontal",
+            row=2,
+            rowspan=1,
+            column=0,
+            columnspan=10,
+            sticky="ew",
         )
         input_title_width, input_entry_width = 14, 5
         for field in range(0, len(self.field_titles[2])):
             create_label(
-                fr=financial_input_area,
-                w=input_title_width,
-                t=self.field_titles[2][field],
-                a="e",
-                fo=field_title_font,
-                r=field + 3,
-                rs=1,
-                c=0,
-                cs=1,
+                frame=financial_input_area,
+                width=input_title_width,
+                text=self.field_titles[2][field],
+                anchor="e",
+                font=field_title_font,
+                row=field + 3,
+                rowspan=1,
+                column=0,
+                columnspan=1,
             )
             entry = create_entry(
-                fr=financial_input_area,
-                w=input_entry_width,
-                s="normal",
-                fo=field_title_font,
-                d=self.field_defaults[2][field],
-                r=field + 3,
-                c=1,
+                frame=financial_input_area,
+                width=input_entry_width,
+                state="normal",
+                font=field_title_font,
+                default=self.field_defaults[2][field],
+                row=field + 3,
+                column=1,
             )
             # Record the entry object so we can access its value later using entry[0][x].get()
             self.field_entries[2].append(entry)
         create_separator(
-            fr=financial_input_area, o="vertical", r=0, rs=10, c=3, cs=1, s="ns"
+            frame=financial_input_area,
+            orientation="vertical",
+            row=0,
+            rowspan=10,
+            column=3,
+            columnspan=1,
+            sticky="ns",
         )
 
     def run_model_with_current_entries(self, entries, graph_frame):
@@ -413,39 +596,35 @@ class GUI(Tk):
         def validate_input_values():
             pass
 
-        self.latest_datetime = self.get_current_datetime()
+        self.latest_datetime = time.strftime("%d.%m.%y/%H:%M:%S")
         output_dir = f"{self.output_dir}/{self.latest_datetime}"
 
         #  if validate_entries(entries, defaults):
         model_inputs = get_current_entry_values(entries)
-        compound_model = Model(output_dir=output_dir, options=model_inputs, log=self.activity_log_textbox)
-        self.activity_log_textbox.insert(END, 'Processing\n')
-        thread = threading.Thread(target = compound_model.auto_run()) 
-        while(thread.is_alive()):
-            print('test')
-            self.activity_log_textbox.insert(END, '.')
-            sleep(0.1)
+        compound_model = Model(
+            output_dir=output_dir, options=model_inputs, log=self.activity_log_textbox
+        )
+        self.activity_log_textbox.insert("end", "Processing\n")
+        thread = threading.Thread(target=compound_model.auto_run())
+        while thread.is_alive():
+            print("test")
+            self.activity_log_textbox.insert("end", ".")
             self.update()
         self.latest_pandemic_model_gif = compound_model.latest_pandemic_gif
         self.latest_financial_model_gif = compound_model.latest_financial_gif
-        self.gif_to_load = 'pandemic'
-        self.load_gif_to_gui(gui_frame = self.graph_frame)
-        
-
-    def get_current_datetime(self):
-        return strftime("%d.%m.%y/%H:%M:%S")
+        self.gif_to_load = "pandemic"
+        self.load_gif_to_gui(gui_frame=self.graph_frame)
 
     def load_gif_to_gui(self, gui_frame):
-        print('test:', self.gif_to_load)
         # def find_latest_gif(self, model):
         #     latest_gif = glob.glob(f"{self.output_dir}/{self.latest_datetime}/*{model}.gif", recursive=True)[0]
         #     return latest_gif
-        if self.gif_to_load == 'pandemic': 
-            gif_path = self.latest_pandemic_model_gif 
-            self.gif_to_load = 'financial'
-        elif self.gif_to_load == 'financial': 
+        if self.gif_to_load == "pandemic":
+            gif_path = self.latest_pandemic_model_gif
+            self.gif_to_load = "financial"
+        elif self.gif_to_load == "financial":
             gif_path = self.latest_financial_model_gif
-            self.gif_to_load = 'pandemic'
+            self.gif_to_load = "pandemic"
 
         graph_image_label = GIF(gui_frame)
         graph_image_label.load(gif_path)
@@ -468,42 +647,90 @@ class GUI(Tk):
         reset_activity_log_to_empty(activity_log)
 
 
-def create_label(fr, w, t, a, r, rs, c, cs, fo=("TkDefaultFont", 12)):
-    label = Label(fr, width=w, text=t, anchor=a, background="#F0F0F0", font=fo)
-    label.grid(row=r, column=c, rowspan=rs, columnspan=cs)
+def create_label(
+    frame,
+    width,
+    text,
+    anchor,
+    row,
+    rowspan,
+    column,
+    columnspan,
+    font=("TkDefaultFont", 12),
+):
+    label = tk.Label(
+        frame, width=width, text=text, anchor=anchor, background="#F0F0F0", font=font
+    )
+    label.grid(row=row, column=column, rowspan=rowspan, columnspan=columnspan)
 
 
-def create_entry(fr, w, s, d, r, c, fo=("TkDefaultFont", 12)):
-    entry = Entry(fr, width=w, state=s, font=fo)
-    entry.insert(0, d)
-    entry.grid(row=r, column=c)
+def create_entry(frame, width, state, default, row, column, font=("TkDefaultFont", 12)):
+    entry = tk.Entry(frame, width=width, state=state, font=font)
+    entry.insert(0, default)
+    entry.grid(row=row, column=column)
     return entry
 
 
-def create_button(fr, w, h, t, a, cmd, r, rs, c, cs, padx, pady, fo=("TkMenuFont", 12)):
-    button = Button(fr, width=w, height=h, text=t, font=fo, anchor=a, background="#F0F0F0", command=cmd)
-    button.grid(row=r, rowspan=rs, column=c, columnspan=cs, padx=padx, pady=pady)
+def create_button(
+    frame,
+    width,
+    height,
+    text,
+    anchor,
+    command,
+    row,
+    rowspan,
+    column,
+    columnspan,
+    padx,
+    pady,
+    font=("TkMenuFont", 12),
+):
+    button = tk.Button(
+        frame,
+        width=width,
+        height=height,
+        text=text,
+        font=font,
+        anchor=anchor,
+        background="#F0F0F0",
+        command=command,
+    )
+    button.grid(
+        row=row,
+        rowspan=rowspan,
+        column=column,
+        columnspan=columnspan,
+        padx=padx,
+        pady=pady,
+    )
     # return button
 
 
-def create_textbox(fr, w, h, r, rs, c, cs, s):
-    textbox = Text(fr, width=w, height=h, state="disabled")
-    textbox.grid(row=r, rowspan=rs, column=c, sticky=s)
-    textbox_scrollbar = Scrollbar(width=4, command=textbox.yview)
+def create_textbox(frame, width, height, row, rowspan, column, columnspan, sticky):
+    textbox = tk.Text(frame, width=width, height=height, state="disabled")
+    textbox.grid(
+        row=row, rowspan=rowspan, column=column, columnspan=columnspan, sticky=sticky
+    )
+    textbox_scrollbar = tk.Scrollbar(width=4, command=textbox.yview)
     textbox["yscrollcommand"] = textbox_scrollbar.set
-    
+
     return textbox
 
-def create_listbox(fr, w, h, r, rs, c, cs, s):
-    listbox = Listbox(fr, width=w, height=h, state="disabled")
-    listbox.grid(row=r, rowspan=rs, column=c, sticky=s)
-    listbox_scrollbar = Scrollbar(width=4, command=listbox.yview)
+
+def create_listbox(frame, width, height, row, rowspan, column, sticky):
+    listbox = tk.Listbox(frame, width=width, height=height, state="disabled")
+    listbox.grid(row=row, rowspan=rowspan, column=column, sticky=sticky)
+    listbox_scrollbar = tk.Scrollbar(width=4, command=listbox.yview)
     listbox["yscrollcommand"] = listbox_scrollbar.set
     return listbox
 
-def create_separator(fr, o, r, rs, c, cs, s):
-    separator = tkinter.ttk.Separator(fr, orient=o)
-    separator.grid(row=r, rowspan=rs, column=c, columnspan=cs, sticky=s)
+
+def create_separator(frame, orientation, row, rowspan, column, columnspan, sticky):
+    separator = tk.ttk.Separator(frame, orient=orientation)
+    separator.grid(
+        row=row, rowspan=rowspan, column=column, columnspan=columnspan, sticky=sticky
+    )
 
 
 def print_to_activity_log(activity_log, message):
@@ -511,13 +738,13 @@ def print_to_activity_log(activity_log, message):
     # Fade existing text - TO DO
     activity_log.configure(fg="black")
     # Highlight new text - TO DO
-    activity_log.insert(END, f"{message}\n")
+    activity_log.insert("end", f"{message}\n")
 
 
 # Source: https://stackoverflow.com/questions/43770847/play-an-animated-gif-in-python-with-tkinter
-class GIF(Label):
+class GIF(tk.Label):
     def load(self, image):
-        # image = 
+        # image =
         print(image)
         if isinstance(image, str):
             image = PIL.Image.open(image)
@@ -525,7 +752,7 @@ class GIF(Label):
         self.frames = []
 
         try:
-            for i in count(1):
+            for i in itertools.count(1):
                 self.frames.append(PIL.ImageTk.PhotoImage(image.copy()))
                 image.seek(i)
         except EOFError:
