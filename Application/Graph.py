@@ -2,7 +2,6 @@ import os
 import networkx as nx
 from pandas import DataFrame
 
-# could have main graph class, then subclass for graph type
 class Graph:
     def __init__(self, agents, cohesion, graph_type, seed):
         self.default_colour = "#CCCCCC"
@@ -33,10 +32,15 @@ class Graph:
             nx.set_node_attributes(
                 self.graph, name="financial_indicator", values=node_alphas
             )
-            node_hatch_patterns = dict.fromkeys(self.graph.nodes, "blank")
-            nx.set_node_attributes(
-                self.graph, name="hatch_pattern", values=node_hatch_patterns
-            )
+            # Attribute representing word description of financial impact
+            verbal_financial_statuses = dict.fromkeys(self.graph.nodes, 'none')
+            nx.set_node_attributes(self.graph, name='financial_status', values = verbal_financial_statuses)
+
+            # Non-functional attribute for representing status as graphic pattern
+            # node_hatch_patterns = dict.fromkeys(self.graph.nodes, "blank")
+            # nx.set_node_attributes(
+            #     self.graph, name="hatch_pattern", values=node_hatch_patterns
+            # )
 
         def add_extra_edge_attributes(self):
             edge_colours = dict.fromkeys(self.graph.edges, self.default_colour)
@@ -77,15 +81,6 @@ class Graph:
             }.get(condition, self.default_colour)
 
         def update_node_fill_alpha(impact: float):
-            # return {
-            #     impact == 1.0: 1.0,
-            #     impact < 1.0 and impact >= 0.8: 0.9,
-            #     impact < 0.8 and impact >= 0.6: 0.8,
-            #     impact < 0.6 and impact >= 0.4: 0.7,
-            #     impact < 0.4 and impact >= 0.2: 0.6,
-            #     impact < 0.2 and impact >= 0.0: 0.5,
-            #     impact < 0.0: 0.25
-            # }
             if impact == 1.0:
                 alpha = 1.0
             elif impact < 1.0 and impact >= 0.8:
@@ -101,6 +96,20 @@ class Graph:
             else:
                 alpha = 0.25
             return alpha
+        
+        def update_financial_status(impact: float):
+            if impact == 1.0:
+                return "none"
+            elif impact < 1.0 and impact >= 0.75:
+                return "minor"
+            elif impact < 0.75 and impact >= 0.5:
+                return "intermediate"
+            elif impact < 0.5 and impact >= 0.25:
+                return "major"
+            elif impact < 0.25 and impact >= 0.0:
+                return "critical"
+            else:
+                return "bust"
 
         # bokeh hatch patterns for glyphs not implemented as of 2.2.3-dev10
         # def update_node_hatch_pattern(status: str):
@@ -119,6 +128,9 @@ class Graph:
             )
             self.graph.nodes[node]["financial_indicator"] = update_node_fill_alpha(
                 self.graph.nodes[node]["financial_impact"]
+            )
+            self.graph.nodes[node]['financial_status'] = update_financial_status(
+                self.graph.nodes[node]['financial_impact']
             )
             # self.graph.nodes[node]["hatch_pattern"] = update_node_hatch_pattern(
             #     self.graph.nodes[node]["financial_impact"]
@@ -156,17 +168,3 @@ class Graph:
         dirs, _ = os.path.split(output_path)
         os.makedirs(dirs, exist_ok=True)
         graph_data.to_csv(output_path)
-
-    # def update_financial_status(self, impact: float):
-    #     if impact == 1.0:
-    #         return "none"
-    #     elif impact < 1.0 and impact >= 0.75:
-    #         return "minor"
-    #     elif impact < 0.75 and impact >= 0.5:
-    #         return "intermediate"
-    #     elif impact < 0.5 and impact >= 0.25:
-    #         return "major"
-    #     elif impact < 0.25 and impact >= 0.0:
-    #         return "critical"
-    #     else:
-    #         return "bust"
