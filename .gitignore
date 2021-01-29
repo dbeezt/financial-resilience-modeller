@@ -9,3 +9,5 @@ build
 dist
 .DS_Store
 .ipynb
+
+/Application/*/*driver
