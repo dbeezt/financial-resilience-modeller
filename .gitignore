@@ -5,3 +5,7 @@ __pycache__/
 
 # Application-generated outputs
 output
+build
+dist
+.DS_Store
+.ipynb
