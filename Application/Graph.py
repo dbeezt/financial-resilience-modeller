@@ -10,7 +10,7 @@ class Graph:
 
     def generate_graph(self, agents, cohesion, graph_type, seed):
         num_of_nodes = len(agents.index)
-        dataframe_as_dict_of_dicts = agents.set_index(agents.index).to_dict("index)")
+        dataframe_as_dict_of_dicts = agents.set_index(agents.index).to_dict('index')
         # place switch for graph_type here
         self.graph = nx.erdos_renyi_graph(n=num_of_nodes, p=cohesion, seed=seed)
         nx.set_node_attributes(self.graph, dataframe_as_dict_of_dicts)
@@ -53,7 +53,7 @@ class Graph:
         nx.set_node_attributes(self.graph, name="degree", values=degrees)
         # Attribute representing scaled-up version of degree
         # for enhanced awareness of nodes' visual indicators
-        min_node_size, max_node_size = 3.5, 20.0
+        min_node_size, max_node_size = 4.0, 20.0
         node_degree_scale = (max_node_size - min_node_size) / max_degree
         node_sizes = dict(
             [
@@ -77,6 +77,15 @@ class Graph:
             }.get(condition, self.default_colour)
 
         def update_node_fill_alpha(impact: float):
+            # return {
+            #     impact == 1.0: 1.0,
+            #     impact < 1.0 and impact >= 0.8: 0.9,
+            #     impact < 0.8 and impact >= 0.6: 0.8,
+            #     impact < 0.6 and impact >= 0.4: 0.7,
+            #     impact < 0.4 and impact >= 0.2: 0.6,
+            #     impact < 0.2 and impact >= 0.0: 0.5,
+            #     impact < 0.0: 0.25
+            # }
             if impact == 1.0:
                 alpha = 1.0
             elif impact < 1.0 and impact >= 0.8:
