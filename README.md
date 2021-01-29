@@ -23,7 +23,7 @@ poetry run python Application/GUI.py
 ```bash
 poetry run black Application/*
 poetry run pylint Application/*
-poetry run pyinstaller PyI.spec --onefile --noconfirm --noconsole --clean
+poetry run pyinstaller --onefile --noconfirm --noconsole --clean PyI.spec
 ```
 
 #### WARNING: Bokeh Plotting
