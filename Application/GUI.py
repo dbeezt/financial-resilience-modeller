@@ -96,8 +96,8 @@ class GUI(tkinter.Tk):
             self.field_titles = [general_fields, pandemic_fields, financial_fields]
 
         def compose_defaults():
-            default_general_values = [100, 1, "erdos_renyi", 5]
-            default_pandemic_values = [0.05, 1, 0.5, 5]
+            default_general_values = [100, 21, "erdos_renyi", 5]
+            default_pandemic_values = [0.01, 1, 0.5, 5]
             default_financial_values = [0.05, 1, 0.1, 5.0]
             self.field_defaults = [
                 default_general_values,
