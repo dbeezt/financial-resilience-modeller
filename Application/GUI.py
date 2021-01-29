@@ -20,6 +20,7 @@ class GUI(tkinter.Tk):
 
         # Operating variables
         self.output_dir = "output"
+        # self.log actually created later on
         self.log_level = 'FULL'
         self.latest_datetime = time.strftime("%d.%m.%y/%H:%M:%S")
         self.latest_pandemic_model_gif = ""
@@ -578,16 +579,18 @@ class GUI(tkinter.Tk):
 
         #  if validate_entries(entries, defaults):
         model_inputs = get_current_entry_values(entries)
-        if self.log == 'FULL':
-            log = 'FULL'
+        
+        if self.log_level == 'FULL':
+            log = self.log
         else:
             log = None
+
+        self.log.insert("end", f"MODEL START: {time.strftime('%d.%m.%y/%H:%M:%S')}.\n")
         compound_model = Model(
             output_dir=output_dir, options=model_inputs, log=log,
         )
-        self.log.insert("end", f"MODEL START: {time.strftime('%d.%m.%y/%H:%M:%S')}.\n")
         compound_model.auto_run()
-        self.log.insert("end", f"MODEL FINISH: {time.strftime('%d.%m.%y/%H:%M:%S')}. \n")
+        self.log.insert("end", f"MODEL FINISH: {time.strftime('%d.%m.%y/%H:%M:%S')}.\n")
         self.latest_pandemic_model_gif = compound_model.latest_pandemic_gif
         self.latest_financial_model_gif = compound_model.latest_financial_gif
         self.load_gif_to_gui(gui_frame=self.graph_frame)
@@ -597,16 +600,17 @@ class GUI(tkinter.Tk):
         if self.gif_to_load == "pandemic":
             gif_path = self.latest_pandemic_model_gif
             self.gif_to_load = "financial"
-        elif self.gif_to_load == "financial":
+        else:
             gif_path = self.latest_financial_model_gif
             self.gif_to_load = "pandemic"
-        else:
-            print("No .gif available.")
 
-        graph_image_label = GIF(gui_frame)
-        graph_image_label.load(gif_path)
-        graph_image_label.grid(row=0, column=0, sticky="nesw")
-        return graph_image_label
+        if gif_path:
+            graph_image_label = GIF(gui_frame)
+            graph_image_label.load(gif_path)
+            graph_image_label.grid(row=0, column=0, sticky="nesw")
+            return graph_image_label
+        else:
+            print('No .gif available to load.')
 
     def reset_inputs(self, *args):
         entries, defaults = args[0], args[1]
