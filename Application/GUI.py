@@ -24,6 +24,7 @@ class GUI(tkinter.Tk):
         self.latest_datetime = time.strftime("%d.%m.%y/%H:%M:%S")
         self.latest_pandemic_model_gif = ""
         self.latest_financial_model_gif = ""
+        self.gif_to_load = ""
 
     def create_window(self):
         # GUI Window settings
@@ -589,7 +590,6 @@ class GUI(tkinter.Tk):
         self.log.insert("end", f"MODEL FINISH: {time.strftime('%d.%m.%y/%H:%M:%S')}. \n")
         self.latest_pandemic_model_gif = compound_model.latest_pandemic_gif
         self.latest_financial_model_gif = compound_model.latest_financial_gif
-        self.gif_to_load = "pandemic"
         self.load_gif_to_gui(gui_frame=self.graph_frame)
 
 
@@ -600,6 +600,8 @@ class GUI(tkinter.Tk):
         elif self.gif_to_load == "financial":
             gif_path = self.latest_financial_model_gif
             self.gif_to_load = "pandemic"
+        else:
+            print("No .gif available.")
 
         graph_image_label = GIF(gui_frame)
         graph_image_label.load(gif_path)
