@@ -90,6 +90,8 @@ class Model:
         financial_impact_count_per_iteration.append(
             self.sum_agent_attributes(financial.graph.nodes.data("financial_impact"))
         )
+        self.print_to_log(f"    State: {self.sum_agent_attributes(pandemic.graph.nodes.data('condition'))}")
+        self.print_to_log(f"    Impact: {self.sum_agent_attributes(pandemic.graph.nodes.data('financial_status'))}")
 
         node_positions = nx.spring_layout(pandemic.graph, k=0.5, seed=self.seed)
         GraphPlot(
@@ -114,9 +116,7 @@ class Model:
             # formata these L's in prin to logs
             self.print_to_log(f"    Cycle #{cycle + 1}")
             print(f"Cycle #{cycle + 1}")
-            self.latest_run_time = time.strftime("%H:%M:%S")
-            # conditions_at_current_cycle = 
-            self.print_to_log(f"        {self.sum_agent_attributes(pandemic.graph.nodes.data('condition'))}")
+            self.latest_run_time = time.strftime("%H:%M:%S")          
             for iteration in range(0, self.pandemic_iterations):
                 print(f"  Pandemic Iteration #{cycle + 1}.{iteration + 1}")
                 pandemic.persist_attributes_between_graphs(financial.graph)
@@ -140,9 +140,10 @@ class Model:
             condition_count_per_iteration.append(
                 self.sum_agent_attributes(pandemic.graph.nodes.data("condition"))
             )
+            self.print_to_log(f"    State: {self.sum_agent_attributes(pandemic.graph.nodes.data('condition'))}")
             for iteration in range(0, self.financial_iterations):
                 self.current_iteration = iteration + 1
-                print(f" Financial Iteration #{cycle + 1}.{iteration + 1}")
+                print(f"  Financial Iteration #{cycle + 1}.{iteration + 1}")
                 financial.persist_attributes_between_graphs(pandemic.graph)
                 financial.graph = self.run_financial_model(
                     financial.graph,
@@ -165,6 +166,7 @@ class Model:
                         financial.graph.nodes.data("financial_impact")
                     )
                 )
+            self.print_to_log(f"    Impact: {self.sum_agent_attributes(pandemic.graph.nodes.data('financial_status'))}")
             pandemic.compose_and_write_csv_of_graph_data(
                 alt_graph=financial.graph,
                 output_path=self.concat_csv_write_path(stats_export_path, cycle + 1, iteration + 1),
