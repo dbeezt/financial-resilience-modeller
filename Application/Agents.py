@@ -1,4 +1,4 @@
-from pandas import DataFrame
+import pandas
 
 class AgentPopulation:
     """
@@ -49,7 +49,7 @@ class AgentPopulation:
             agents (DataFrame):
                 DataFrame of agents with default-configured attributes
         """
-        agents = DataFrame(
+        agents = pandas.DataFrame(
             index=range(0, num_of_agents),
             columns=[
                 "condition",
