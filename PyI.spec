@@ -3,11 +3,11 @@
 block_cipher = None
 
 
-a = Analysis(['GUI.py'],
+a = Analysis(['Application/GUI.py'],
              pathex=['/Users/a9887715/dissertation/submission/financial-resilience-modeller/Application'],
              binaries=[],
              datas=[],
-             hiddenimports=[cmath],
+             hiddenimports=['cmath'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
