@@ -19,7 +19,9 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
           a.scripts,
-          [],
+          a.binaries,
+          a.zipfiles,
+          a.datas,
           exclude_binaries=True,
           name='FRM',
           debug=False,
@@ -29,11 +31,3 @@ exe = EXE(pyz,
           console=False,
           icon='Static/icon.ico'
         )
-coll = COLLECT(exe,
-               a.binaries,
-               a.zipfiles,
-               a.datas,
-               strip=False,
-               upx=True,
-               upx_exclude=[],
-               name='FRM')
