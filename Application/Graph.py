@@ -10,7 +10,6 @@ class Graph:
     def generate_graph(self, agents, cohesion, graph_type, seed):
         num_of_nodes = len(agents.index)
         dataframe_as_dict_of_dicts = agents.set_index(agents.index).to_dict('index')
-        # place switch for graph_type here
         self.graph = nx.erdos_renyi_graph(n=num_of_nodes, p=cohesion, seed=seed)
         nx.set_node_attributes(self.graph, dataframe_as_dict_of_dicts)
 
@@ -77,7 +76,7 @@ class Graph:
             return {
                 "susceptible": "#00FF00",
                 "infectious": "#FF0000",
-                "removed": "#d3d3d3",
+                "removed": "#3A3B3C",
             }.get(condition, self.default_colour)
 
         def update_node_fill_alpha(impact: float):
