@@ -246,7 +246,7 @@ class Model:
             return {
                 "susceptible": "#00FF00",
                 "infectious": "#FF0000",
-                "removed": "#d3d3d3",
+                "removed": "#CCCCCC",
             }.get(condition, "#CCCCCC")
 
         time_before_becoming_contagious = math.ceil(time_to_recover / 5)
