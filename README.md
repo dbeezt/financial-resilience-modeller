@@ -4,15 +4,7 @@ Interface to an agent-based model aimed at examining shock propagation between f
 
 ## Example Simulation
 
-Example Model Variables
-:----------------------------------------------------:
-![Example Compound model variables](Static/example_simulation/model_variables.png)
-:----------------------------------------------------:
-Example Model .GIFs
-:----------------------------------------------------:
-Pandemic                  |  Financial
-:------------------------:|:-------------------------:
-![.gif of Pandemic model](Static/example_simulation/pandemic.gif) |  ![.gif of Financial model](Static/example_simulation/financial.gif)
+![.gif of Pandemic model](Static/example_simulation/pandemic.gif)
 
 ## GUI Instructions
 
