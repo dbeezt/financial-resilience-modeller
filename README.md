@@ -2,10 +2,17 @@
 
 Interface to an agent-based model aimed at examining shock propagation between financial entities during the covid-19 pandemic.
 
+## Example Simulation
+
+Example Model Variables
+:----------------------------------------------------:
+![Example Compound model variables](Static/example_simulation/model_variables.png)
+:----------------------------------------------------:
+Example Model .GIFs
+:----------------------------------------------------:
 Pandemic                  |  Financial
 :------------------------:|:-------------------------:
-![.gif of Pandemic model](Static/pandemic.gif) |  ![.gif of Financial model](Static/financial.gif)
-
+![.gif of Pandemic model](Static/example_simulation/pandemic.gif) |  ![.gif of Financial model](Static/example_simulation/financial.gif)
 
 ## GUI Instructions
 
