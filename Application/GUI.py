@@ -584,12 +584,15 @@ class GUI(tkinter.Tk):
         else:
             log = None
 
-        self.log.insert("end", f"MODEL START: {time.strftime('%d.%m.%y/%H:%M:%S')}.\n")
+        # self.log.insert("end", f"MODEL START: {time.strftime('%d.%m.%y/%H:%M:%S')}.\n")
+        start = time.time()
         compound_model = Model(
             output_dir=output_dir, options=model_inputs, log=log,
         )
         compound_model.auto_run()
-        self.log.insert("end", f"MODEL FINISH: {time.strftime('%d.%m.%y/%H:%M:%S')}.\n")
+        end = time.time()
+        self.log.insert("end", f"MODEL DURATION: {round((end - start), 2)}\n")
+        # self.log.insert("end", f"MODEL FINISH: {time.strftime('%d.%m.%y/%H:%M:%S')}.\n")
         self.latest_pandemic_model_gif = compound_model.latest_pandemic_gif
         self.latest_financial_model_gif = compound_model.latest_financial_gif
         self.gif_to_load = ''
