@@ -28,6 +28,7 @@ class Model:
         self.enforce_input_value_data_types(options)
     
     def print_to_log(self, message):
+        print(message)
         if self.log:
             self.log.insert('end', f"{message}\n")
 
@@ -114,11 +115,10 @@ class Model:
             # Used for generating iterative seed when performing random interaction checks
             self.cycle = cycle
             # formata these L's in prin to logs
-            self.print_to_log(f"    Cycle #{cycle + 1}")
-            print(f"Cycle #{cycle + 1}")
+            self.print_to_log(f"Cycle #{cycle + 1}")
             self.latest_run_time = time.strftime("%H:%M:%S")          
             for iteration in range(0, self.pandemic_iterations):
-                print(f"  Pandemic Iteration #{cycle + 1}.{iteration + 1}")
+                self.print_to_log(f"\tPandemic Iteration #{cycle + 1}.{iteration + 1}")
                 pandemic.persist_attributes_between_graphs(financial.graph)
                 pandemic.graph = self.run_pandemic_model(
                     pandemic.graph,
@@ -140,10 +140,10 @@ class Model:
             condition_count_per_iteration.append(
                 self.sum_agent_attributes(pandemic.graph.nodes.data("condition"))
             )
-            self.print_to_log(f"    State: {self.sum_agent_attributes(pandemic.graph.nodes.data('condition'))}")
+            self.print_to_log(f"Epidemiological States: {self.sum_agent_attributes(pandemic.graph.nodes.data('condition'))}")
             for iteration in range(0, self.financial_iterations):
                 self.current_iteration = iteration + 1
-                print(f"  Financial Iteration #{cycle + 1}.{iteration + 1}")
+                self.print_to_log(f"\tFinancial Iteration #{cycle + 1}.{iteration + 1}")
                 financial.persist_attributes_between_graphs(pandemic.graph)
                 financial.graph = self.run_financial_model(
                     financial.graph,
@@ -166,12 +166,11 @@ class Model:
                         financial.graph.nodes.data("financial_impact")
                     )
                 )
-            self.print_to_log(f"    Impact: {self.sum_agent_attributes(pandemic.graph.nodes.data('financial_status'))}")
+            self.print_to_log(f"Financial Impacts: {self.sum_agent_attributes(pandemic.graph.nodes.data('financial_status'))}")
             pandemic.compose_and_write_csv_of_graph_data(
                 alt_graph=financial.graph,
                 output_path=self.concat_csv_write_path(stats_export_path, cycle + 1, iteration + 1),
             )
-            # f"{graphml_dir_path}/{self.latest_run_time}-{cycle}.{iteration}.graphml"
 
         self.latest_pandemic_gif = self.compose_gif_from_pngs(
             f"{plot_export_path}/network/pandemic"
@@ -250,7 +249,6 @@ class Model:
             }.get(condition, "#CCCCCC")
 
         time_before_becoming_contagious = math.ceil(time_to_recover / 5)
-        # print(time_before_becoming_contagious)
         agent_population: int = len(graph.nodes)
         graph.add_nodes_from(graph.nodes, able_to_recover=True)
         for agent in range(0, agent_population):
@@ -262,38 +260,22 @@ class Model:
                     )
                     graph.nodes[source_node]["condition"] = "removed"
                     graph.nodes[source_node]["able_to_recover"] = False
-                    # should add blank return here?
+
                 if graph.nodes[source_node]["condition"] == "infectious":
-                    # print(graph.nodes[source_node]["time_exposed"])
-                    # print(graph.nodes[agent]["able_to_recover"])
-                    # var. show to time before becoming infectious to others
                     if (
                         graph.nodes[source_node]["time_exposed"]
                         > time_before_becoming_contagious
                     ):
-                        # print(f"{graph.nodes[source_node]['location']}:{graph.nodes[source_node]['condition']}")
                         if graph.nodes[target_node]["condition"] == "susceptible":
-                            # print(f"{graph.nodes[target_node]['location']}:{graph.nodes[target_node]['condition']}")
-                            # Initialise random generator for repeatable results
-                            # This seed is annoying
                             random.seed(self.cycle + target_node)
                             chance_of_transmission = round(random.random(), 2)
-                            # print(f"    Infection will occur if the transmission rate is over {chance_of_transmission}")
-                            # could put nice inline if here TRUE if >= 0.00
-                            # chance_of_transmission = pandemic_transmission_rate - chance_of_transmission
-                            # print(f"{graph.nodes[target_node]['location']}'s chance to be infected is {chance_of_transmission}")
-                            # print(chance_of_transmission)
                             if transmission_rate - chance_of_transmission >= 0.00:
                                 graph.edges[edge][
                                     "edge_colour"
                                 ] = update_edge_fill_colour("infectious")
-                                # print(f"{graph.nodes[source_node]['location']} infected {graph.nodes[target_node]['location']}")
                                 graph.nodes[target_node]["condition"] = "infectious"
                                 graph.nodes[target_node]["able_to_recover"] = False
-                    # print(f"{graph.nodes[source_node]['location']} is able to recover: {graph.nodes[source_node]['able_to_recover']}")
-                    # print(graph.nodes[agent]["able_to_recover"])
                     if graph.nodes[agent]["able_to_recover"]:
-                        # print(f"{graph.nodes[source_node]['location']} recovered, now at {graph.nodes[source_node]['time_exposed']}")
                         time_exposed = graph.nodes[agent]["time_exposed"]
                         graph.nodes[agent]["time_exposed"] = time_exposed + 1
                         graph.nodes[agent]["able_to_recover"] = False
@@ -308,9 +290,6 @@ class Model:
                     graph.nodes[agent]["condition"] == "infectious"
                     and graph.nodes[agent]["time_exposed"] > 1
                 ):
-                    # print("bank", agent, graph.nodes[agent]["financial_impact"])
-                    # asset value should be float to 2 points
-                    # multiply this by number of degrees?
                     reduced_asset_value = (
                         graph.nodes[agent]["initial_asset_value"] * lockdown_severity
                     )
@@ -318,9 +297,6 @@ class Model:
                     graph.nodes[agent]["current_asset_value"] = (
                         current_asset_value - reduced_asset_value
                     )
-                    # print(
-                    # f"Node{agent}'s wealth reduced by {reduced_asset_value}, from {current_asset_value} to {graph.nodes[agent]['current_asset_value']}"
-                    # )
                 for edge in graph.edges(agent):
                     (source_node, target_node) = edge
                     if (
@@ -356,12 +332,5 @@ class Model:
                         )
 
                         if graph.nodes[source_node]["financial_impact"] == "bust":
-                            print(f"Node {source_node} is bust")
-                            # graph.nodes[source_node][
-                            #     "financial_impact"
-                            # ] = self.update_financial_status(financial_damage)
-                        # aka go bust
-
-                        # need to add edge colouration for this model
-
+                            self.log(f"Node {source_node} is bust!")
         return graph
