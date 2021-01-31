@@ -1,6 +1,6 @@
 # Financial Resilience Modeller
 
-Interface to an agent-based model aimed at examining shock propagation between financial entities during the covid-19 pandemic.
+Interface to a compound agent-based model focused on examining hypothetical scenarios for the purpose of speculative analysis. Of interest is the propagation of alternative shocks across each inner model (pandemic, financial), where the former propagates a shock in the form of virulent spread and the latter propagates a shock in the form of reduced capacity for financial lending.
 
 ## Example Simulation
 
