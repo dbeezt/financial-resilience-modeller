@@ -366,7 +366,7 @@ class GUI(tkinter.Tk):
         )
         financial_input_area.grid(row=0, column=2, sticky="nsew")
 
-        area_title_font, field_title_font = ("TkDefaultFont", 12), ("TkDefaultFont", 11)
+        area_title_font, field_title_font = ("TkDefaultFont", 12), ("TkDefaultFont", 10)
         create_separator(
             frame=general_input_area,
             orientation="horizontal",
@@ -460,7 +460,7 @@ class GUI(tkinter.Tk):
             columnspan=10,
             sticky="ew",
         )
-        input_title_width, input_entry_width = 16, 5
+        input_title_width, input_entry_width = 15, 5
         for field in range(0, len(self.field_titles[1])):
             create_label(
                 frame=pandemic_input_area,
