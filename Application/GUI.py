@@ -95,9 +95,9 @@ class GUI(tkinter.Tk):
             self.field_titles = [general_fields, pandemic_fields, financial_fields]
 
         def compose_defaults():
-            default_general_values = [100, 21, "erdos_renyi", 5]
-            default_pandemic_values = [0.01, 1, 0.5, 5]
-            default_financial_values = [0.05, 1, 0.1, 5.0]
+            default_general_values = [1000, 30, 'erdos_renyi', 15]
+            default_pandemic_values = [0.001, 1, 0.66, 7]
+            default_financial_values = [0.001, 1, 0.15, 5.0]
             self.field_defaults = [
                 default_general_values,
                 default_pandemic_values,
@@ -584,15 +584,13 @@ class GUI(tkinter.Tk):
         else:
             log = None
 
-        # self.log.insert("end", f"MODEL START: {time.strftime('%d.%m.%y/%H:%M:%S')}.\n")
-        start = time.time()
+        start_time = time.time()
         compound_model = Model(
             output_dir=output_dir, options=model_inputs, log=log,
         )
         compound_model.auto_run()
-        end = time.time()
-        self.log.insert("end", f"MODEL DURATION: {round((end - start), 2)}\n")
-        # self.log.insert("end", f"MODEL FINISH: {time.strftime('%d.%m.%y/%H:%M:%S')}.\n")
+
+        self.log.insert("end", f"MODEL DURATION: {round((time.time() - start_time), 2)}\n")
         self.latest_pandemic_model_gif = compound_model.latest_pandemic_gif
         self.latest_financial_model_gif = compound_model.latest_financial_gif
         self.gif_to_load = ''
