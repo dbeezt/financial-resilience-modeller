@@ -91,8 +91,9 @@ class Model:
         financial_impact_count_per_iteration.append(
             self.sum_agent_attributes(financial.graph.nodes.data("financial_impact"))
         )
-        self.print_to_log(f"    State: {self.sum_agent_attributes(pandemic.graph.nodes.data('condition'))}")
-        self.print_to_log(f"    Impact: {self.sum_agent_attributes(pandemic.graph.nodes.data('financial_status'))}")
+
+        self.print_to_log(f"Conditions: {self.sum_agent_attributes(pandemic.graph.nodes.data('condition'))}")
+        self.print_to_log(f"Impacts: {self.sum_agent_attributes(pandemic.graph.nodes.data('financial_status'))}")
 
         node_positions = nx.spring_layout(pandemic.graph, k=0.5, seed=self.seed)
         GraphPlot(
@@ -112,10 +113,9 @@ class Model:
         )
 
         for cycle in range(0, self.model_cycles):
-            # Used for generating iterative seed when performing random interaction checks
+            # self.cycle: Used for generating iterative seed when performing random interaction checks
             self.cycle = cycle
-            # formata these L's in prin to logs
-            self.print_to_log(f"Cycle #{cycle + 1}")
+            self.print_to_log(f"  Cycle #{cycle + 1}")
             self.latest_run_time = time.strftime("%H:%M:%S")          
             for iteration in range(0, self.pandemic_iterations):
                 self.print_to_log(f"\tPandemic Iteration #{cycle + 1}.{iteration + 1}")
@@ -140,7 +140,7 @@ class Model:
             condition_count_per_iteration.append(
                 self.sum_agent_attributes(pandemic.graph.nodes.data("condition"))
             )
-            self.print_to_log(f"Epidemiological States: {self.sum_agent_attributes(pandemic.graph.nodes.data('condition'))}")
+            self.print_to_log(f"\t  Conditions: {self.sum_agent_attributes(pandemic.graph.nodes.data('condition'))}")
             for iteration in range(0, self.financial_iterations):
                 self.current_iteration = iteration + 1
                 self.print_to_log(f"\tFinancial Iteration #{cycle + 1}.{iteration + 1}")
@@ -166,11 +166,16 @@ class Model:
                         financial.graph.nodes.data("financial_impact")
                     )
                 )
-            self.print_to_log(f"Financial Impacts: {self.sum_agent_attributes(pandemic.graph.nodes.data('financial_status'))}")
+            self.print_to_log(f"\t  Impacts: {self.sum_agent_attributes(pandemic.graph.nodes.data('financial_status'))}")
             pandemic.compose_and_write_csv_of_graph_data(
                 alt_graph=financial.graph,
                 output_path=self.concat_csv_write_path(stats_export_path, cycle + 1, iteration + 1),
             )
+        
+        mean_fin_impact_plot = DataPlot(
+            path_to_data=f"{stats_export_path}/graph/node_attributes",
+            export_path=f"{plot_export_path}",
+        ).mean_fin_impact()
 
         self.latest_pandemic_gif = self.compose_gif_from_pngs(
             f"{plot_export_path}/network/pandemic"
@@ -178,11 +183,6 @@ class Model:
         self.latest_financial_gif = self.compose_gif_from_pngs(
             f"{plot_export_path}/network/financial"
         )
-
-        # data_plot = DataPlot(
-        #     path_to_data=f"{stats_export_path}/graph/node_attributes",
-        #     export_path=f"{plot_export_path}/data",
-        # ).create_plot()
 
     def concat_csv_write_path(self, stats_dir, cycle, iteration):
         return f"{stats_dir}/graph/node_attributes/{self.latest_run_time}-{cycle}.{iteration}.csv"
