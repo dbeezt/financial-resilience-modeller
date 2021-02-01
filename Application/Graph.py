@@ -159,9 +159,9 @@ class Graph:
                 "financial_degree",
                 "condition",
                 "time_exposed",
-                "financial_impact",
                 "initial_asset_value",
                 "current_asset_value",
+                "financial_impact",
             ],
         )
         dirs, _ = os.path.split(output_path)
