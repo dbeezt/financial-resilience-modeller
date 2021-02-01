@@ -210,6 +210,14 @@ pyyaml = ["pyyaml"]
 scipy = ["scipy"]
 
 [[package]]
+name = "nose"
+version = "1.3.7"
+description = "nose extends unittest to make testing easier"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "numpy"
 version = "1.20.0"
 description = "NumPy is the fundamental package for array computing with Python."
@@ -395,6 +403,18 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
+name = "tabular"
+version = "0.1"
+description = "Tabular data container and associated convenience routines in Python"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+nose = "*"
+numpy = ">=1.6"
+
+[[package]]
 name = "toml"
 version = "0.10.2"
 description = "Python Library for Tom's Obvious, Minimal Language"
@@ -450,7 +470,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.10"
-content-hash = "d70613bc5477acf3efc84bae09d0b1d603cf79c3f56c7a6b7bbb69926fd0aa12"
+content-hash = "364edef57f648d2d71dad3a3fba3a3b936750680d1cbc75f2e55061e1ea5d8ea"
 
 [metadata.files]
 altgraph = [
@@ -575,6 +595,11 @@ mypy-extensions = [
 networkx = [
     {file = "networkx-2.5-py3-none-any.whl", hash = "sha256:8c5812e9f798d37c50570d15c4a69d5710a18d77bafc903ee9c5fba7454c616c"},
     {file = "networkx-2.5.tar.gz", hash = "sha256:7978955423fbc9639c10498878be59caf99b44dc304c2286162fd24b458c1602"},
+]
+nose = [
+    {file = "nose-1.3.7-py2-none-any.whl", hash = "sha256:dadcddc0aefbf99eea214e0f1232b94f2fa9bd98fa8353711dacb112bfcbbb2a"},
+    {file = "nose-1.3.7-py3-none-any.whl", hash = "sha256:9ff7c6cc443f8c51994b34a667bbcf45afd6d945be7477b52e97516fd17c53ac"},
+    {file = "nose-1.3.7.tar.gz", hash = "sha256:f1bffef9cbc82628f6e7d7b40d7e255aefaa1adb6a1b1d26c69a8b79e6208a98"},
 ]
 numpy = [
     {file = "numpy-1.20.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:89bd70c9ad540febe6c28451ba225eb4e49d27f64728357f512c808002325dfa"},
@@ -787,6 +812,9 @@ selenium = [
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
     {file = "six-1.15.0.tar.gz", hash = "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"},
+]
+tabular = [
+    {file = "tabular-0.1.tar.gz", hash = "sha256:372a1004b2dce3fd811531c04c77ce7e047160f7a246b3de6d510878200d1cc1"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
